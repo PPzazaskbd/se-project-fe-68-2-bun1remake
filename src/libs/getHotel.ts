@@ -3,7 +3,7 @@ import { buildBackendUrl } from "@/libs/backendApiBase";
 
 export default async function getHotel(hid: string) {
   try {
-    const response = await fetch(buildBackendUrl(`/hotels/${encodeURIComponent(vid)}`), {
+    const response = await fetch(buildBackendUrl(`/hotels/${encodeURIComponent(hid)}`), {
       cache: "no-store",
     });
 
