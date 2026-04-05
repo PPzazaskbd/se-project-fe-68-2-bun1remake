@@ -42,7 +42,7 @@ export default function TopMenu() {
     ? "/profile"
     : `/login?callbackUrl=${encodeURIComponent("/profile")}`;
   const authHref = session ? "/" : "/login";
-  const isHotelsActive = pathname.startsWith("/venue");
+  const isHotelsActive = pathname.startsWith("/hotel");
   const isBookingsActive = pathname === "/mybooking" || pathname === "/admin";
   const isProfileActive = pathname === "/profile";
   const isAuthActive =
@@ -151,7 +151,7 @@ export default function TopMenu() {
               style={{ background: "rgba(171, 25, 46, 0.28)" }}
             />
             <Link
-              href="/venue"
+              href="/hotel"
               ref={(node) => {
                 linkRefs.current.hotels = node;
               }}

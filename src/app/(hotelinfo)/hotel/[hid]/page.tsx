@@ -4,10 +4,10 @@ import getVenue from "@/libs/getHotel";
 export default async function HotelDetailPage({
   params,
 }: {
-  params: Promise<{ vid: string }>;
+  params: Promise<{ hid: string }>;
 }) {
-  const { vid } = await params;
-  const venueJson = await getVenue(vid);
+  const { hid } = await params;
+  const venueJson = await getVenue(hid);
   const hotel = venueJson.data;
 
   if (!hotel) {
