@@ -46,6 +46,7 @@ export default function AdminHotelsPage() {
 
   const [hotels, setHotels] = useState<HotelItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
   const [editingHotel, setEditingHotel] = useState<HotelItem | null>(null);
   const [form, setForm] = useState<HotelPayload>(EMPTY_FORM);
   const [tagInput, setTagInput] = useState("");
@@ -79,11 +80,13 @@ export default function AdminHotelsPage() {
     setEditingHotel(null);
     setForm(EMPTY_FORM);
     setTagInput("");
+    setShowForm(true);
     dismissNotice(true);
     scrollToForm();
   };
 
   const handleStartEdit = (hotel: HotelItem) => {
+    setShowForm(true);
     setEditingHotel(hotel);
     setForm({
       name: hotel.name,
@@ -104,6 +107,7 @@ export default function AdminHotelsPage() {
   };
 
   const handleCancelForm = () => {
+    setShowForm(false);
     setEditingHotel(null);
     setForm(EMPTY_FORM);
     setTagInput("");
@@ -145,6 +149,7 @@ export default function AdminHotelsPage() {
         showNotice({ type: "success", message: "Hotel created." });
       }
 
+      setShowForm(false);
       setEditingHotel(null);
       setForm(EMPTY_FORM);
     } catch (err) {
@@ -192,7 +197,7 @@ export default function AdminHotelsPage() {
     );
   }
 
-  const isFormOpen = editingHotel !== null || form.name !== "";
+  const isFormOpen = showForm;
 
   return (
     <main className="figma-page py-10 sm:py-12">
