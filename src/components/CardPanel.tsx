@@ -211,6 +211,7 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
                 province={hotel.province}
                 price={hotel.price}
                 imgSrc={hotel.imgSrc}
+                tags={hotel.tags}
               />
             ))}
           </div>

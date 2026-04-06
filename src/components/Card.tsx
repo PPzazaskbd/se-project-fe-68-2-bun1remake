@@ -7,6 +7,7 @@ interface CardProps {
   province: string;
   price: number;
   imgSrc?: string;
+  tags?: string[];
 }
 
 export default function Card({
@@ -16,6 +17,7 @@ export default function Card({
   province,
   price,
   imgSrc,
+  tags,
 }: CardProps) {
   return (
     <article className="figma-card-surface border border-[rgba(171,25,46,0.08)] bg-[#fff8f3]">
@@ -47,6 +49,18 @@ export default function Card({
           <p className="mt-1 font-figma-copy text-[1rem] text-[var(--figma-red)] sm:text-[1.1rem]">
             ${price.toLocaleString()} per night
           </p>
+          {tags && tags.length > 0 ? (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="border border-[rgba(171,25,46,0.18)] px-2 py-0.5 font-figma-copy text-[0.9rem] text-[var(--figma-ink-soft)]"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         <Link

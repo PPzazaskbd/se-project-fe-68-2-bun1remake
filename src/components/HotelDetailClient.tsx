@@ -240,6 +240,19 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
                 <span className="pt-1 text-[var(--figma-red)]">+</span>
                 <span>{hotel.address}</span>
               </p>
+
+              {hotel.tags && hotel.tags.length > 0 ? (
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {hotel.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="border border-[rgba(171,25,46,0.18)] px-3 py-1 font-figma-copy text-[1.1rem] text-[var(--figma-ink-soft)]"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
             </div>
 
             <div className="flex flex-col justify-between gap-8">
