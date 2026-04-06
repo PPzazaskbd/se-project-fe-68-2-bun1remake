@@ -305,7 +305,7 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
                 </button>
 
                 <Link
-                  href={buildDateRangeHref("/venue", {
+                  href={buildDateRangeHref("/hotel", {
                     checkIn: fromDate,
                     checkOut: toDate,
                     guestsAdult,

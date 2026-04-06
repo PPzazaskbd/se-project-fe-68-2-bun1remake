@@ -20,7 +20,7 @@ export default function Banner() {
           </p>
 
           <Link
-            href="/venue"
+            href="/hotel"
             className="figma-button figma-button-prominent mt-10 px-8 py-3 font-figma-display text-[1.45rem] sm:text-[1.9rem]"
           >
             Book Your Stay
