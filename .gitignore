@@ -8,3 +8,4 @@ tsconfig.tsbuildinfo
 .codex-frontend.err.log
 PLANS.md
 present.md
+.DS_store
