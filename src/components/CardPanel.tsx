@@ -234,6 +234,7 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
             {visibleHotels.map((hotel: HotelItem) => (
               <Card
                 key={hotel.id || hotel._id}
+                id={hotel.id || hotel._id}
                 isAdmin={isAdmin}
                 href={buildDateRangeHref(`/hotel/${hotel.id || hotel._id}`, {
                   checkIn: fromDate,
