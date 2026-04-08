@@ -46,19 +46,13 @@ export default function Card({
           <div className="absolute right-3 top-3 flex gap-2">
             {/* ปุ่ม edit */}
             <button className="flex h-10 w-10 items-center justify-center bg-red-700 text-white shadow hover:bg-red-800 transition-colors cursor-pointer">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-              </svg>  
+              <img src="/edit.svg" alt="Edit icon" className="h-[18px] w-[18px]" />
             </button>
 
             {/* ปุ่ม delete */}
             <Link href={`/hotel/deleteHotel?id=${id}&name=${encodeURIComponent(name)}`}>
               <button className="flex h-10 w-10 items-center justify-center bg-red-700 text-white shadow hover:bg-red-800 transition-colors cursor-pointer">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
+                <img src="/delete.svg" alt="Delete icon" className="h-[18px] w-[18px]" />
               </button>
             </Link>
             
