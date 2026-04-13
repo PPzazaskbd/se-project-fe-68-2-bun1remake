@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { CommentItem } from "@/interface";
 import { createComment, deleteComment, getComments } from "@/libs/commentsApi";
 import { useDismissibleNotice } from "@/libs/useDismissibleNotice";
@@ -309,10 +310,9 @@ export default function HotelReviews({ hotelId }: HotelReviewsProps) {
         </p>
       )}
 
-      {/* Modal */}
-      {modal && (
+      {modal && typeof document !== "undefined" && createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 p-4"
           onClick={(e) => { if (e.target === e.currentTarget) setModal(null); }}
         >
           <div className="relative w-full max-w-md bg-white p-6 shadow-xl">
@@ -353,7 +353,8 @@ export default function HotelReviews({ hotelId }: HotelReviewsProps) {
               {relativeTime(modal.commentDate)}
             </p>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </section>
   );
