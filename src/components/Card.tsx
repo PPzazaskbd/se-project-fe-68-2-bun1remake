@@ -23,7 +23,6 @@ export default function Card({
 }: CardProps) {
   return (
     <article className="figma-card-surface border border-[rgba(171,25,46,0.08)] bg-[#fff8f3]">
-      
       <div className="relative block">
         <Link href={href} className="block">
           <div className="aspect-[616/275] overflow-hidden bg-[#efe3d8]">
