@@ -14,6 +14,7 @@ import {
   getDateRangeFromSearchParams,
   normalizeDateRange,
 } from "@/libs/dateRangeParams";
+import Link from "next/link";
 
 const ITEMS_PER_PAGE = 4;
 
@@ -30,6 +31,7 @@ function isEditableTarget(target: EventTarget | null) {
 
 export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
   const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "admin"; 
   const hotels = hotelsJson.data ?? [];
   const pathname = usePathname();
   const router = useRouter();
@@ -154,6 +156,8 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
     );
   }
 
+  
+
   return (
     <section className="figma-page py-6 sm:py-8">
       <div className="figma-shell">
@@ -176,23 +180,39 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
           }}
         />
 
-        <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-end">
-          <div>
-            <label className="font-figma-nav text-[1rem] tracking-[0.08em] text-[var(--figma-red)]">
-              FIND A HOTEL
-            </label>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              className="figma-input mt-2"
-              placeholder="Search by hotel name, city, or address"
-            />
-          </div>
+        <div className="mt-6">
+          <div className="flex items-center justify-between gap-4">
+            
+            <div className="flex items-center gap-4">
+              <label className="font-figma-nav text-[1rem] tracking-[0.08em] text-[var(--figma-red)]">
+                FIND A HOTEL
+              </label>
+              <p className="font-figma-copy text-[1.15rem] text-[var(--figma-ink-soft)]">
+                {filteredHotels.length} hotel{filteredHotels.length === 1 ? "" : "s"} available
+              </p>
+            </div>
 
-          <p className="font-figma-copy text-[1.15rem] text-[var(--figma-ink-soft)] lg:text-right">
-            {filteredHotels.length} hotel{filteredHotels.length === 1 ? "" : "s"} available
-          </p>
+            <div className="flex items-center gap-3">
+              
+              {isAdmin && (
+                <Link href="/hotel/create">
+                  <button className="flex items-center gap-2 bg-red-700 px-6 py-2 text-white shadow hover:bg-red-800 transition-colors cursor-pointer">
+                    <img src="/addhotel.svg" alt="Add icon" className="w-5 h-5" />
+                    <span className="font-figma-copy text-[1.15rem] tracking-wide">Add</span>
+                  </button>
+                </Link>
+              )}
+            </div>
+
+          </div>
+          
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            className="figma-input mt-4 w-full"
+            placeholder="Search by hotel name, city, or address"
+          />
         </div>
 
         {visibleHotels.length > 0 ? (
@@ -200,6 +220,8 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
             {visibleHotels.map((hotel: HotelItem) => (
               <Card
                 key={hotel.id || hotel._id}
+                id={hotel.id || hotel._id}
+                isAdmin={isAdmin}
                 href={buildDateRangeHref(`/hotel/${hotel.id || hotel._id}`, {
                   checkIn: fromDate,
                   checkOut: toDate,
