@@ -30,6 +30,7 @@ export default function VenueCatalogClient() {
       {venues.data.map((item) => (
         <Card
           key={item.id || item._id}
+          id={item.id || item._id}
           href={`/venue/${item.id || item._id}`}
           name={item.name}
           address={item.address}

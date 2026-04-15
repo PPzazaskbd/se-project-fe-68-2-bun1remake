@@ -29,8 +29,9 @@ export default function VenueCatalog() {
     <div className="grid gap-8 lg:grid-cols-2">
       {venues.data.map((item) => (
         <Card
-          key={item.id || item._id}
-          href={`/venue/${item.id || item._id}`}
+          key={item._id}
+          id={item._id}
+          href={`/venue/${item._id}`}
           name={item.name}
           address={item.address}
           province={item.province}
