@@ -42,17 +42,18 @@ export interface HotelItem {
   description: string;
   imgSrc?: string;
   price: number;
-  tags?: string[];
+  tags?: string[]; // facility/category tags e.g. ["Pool", "Wifi", "City-Center"]
   __v?: number;
 }
 
+// CommentItem represents a single user review on a hotel
 export interface CommentItem {
   _id: string;
   commentDate: string;
   userId: string | { _id?: string; id?: string; name?: string };
   hotelId: string;
   comment: string;
-  rating: number;
+  rating: number; // 1–5 star rating selected by the user
 }
 
 interface BackendReferenceItem {
