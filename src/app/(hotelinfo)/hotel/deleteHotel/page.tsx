@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"; 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { deleteHotel } from "@/libs/deleteHotel";
+import { deleteHotelRecache } from "@/libs/recache";
 
 export default function DeleteHotelPage() {
     const { data: session, status } = useSession();
@@ -13,6 +13,7 @@ export default function DeleteHotelPage() {
     const hotelId = searchParams.get("id");
 
     const [confirmName, setConfirmName] = useState("");
+    const [isDeleting, setIsDeleting] = useState(false);
     const isMatch = confirmName === hotelName;
 
     // useEffect(() => {
@@ -39,7 +40,9 @@ export default function DeleteHotelPage() {
         if (!session?.user?.token) return;
 
         try {
-            await deleteHotel(id, session.user.token);
+            setIsDeleting(true);
+            await deleteHotelRecache(id, session.user.token);
+            router.push("/hotel");
         } catch (error) {
             console.error(error);
             alert(
@@ -47,6 +50,8 @@ export default function DeleteHotelPage() {
                 ? error.message
                 : "Failed to delete hotel."
             );
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -85,6 +90,8 @@ export default function DeleteHotelPage() {
                 <div className="mt-10 flex w-full font-bold">
                     {/* ปุ่ม CANCEL */}
                     <button 
+                        type="button"
+                        disabled={isDeleting}
                         className="w-1/2 bg-[#B23B47] py-3 text-[1.15rem] tracking-wider text-white transition-colors hover:bg-red-800 cursor-pointer"
                         onClick={() => router.back()}
                     >
@@ -93,23 +100,22 @@ export default function DeleteHotelPage() {
                     
                     {/* ปุ่ม DELETE */}
                     <button 
-                        disabled={!isMatch}
+                        type="button"
+                        disabled={!isMatch || isDeleting}
                         className={`w-1/2 py-3 text-[1.15rem] tracking-wider border border-[#B23B47] transition-all
-                            ${isMatch 
+                            ${isMatch && !isDeleting
                                 ? "bg-[#FDF6EF] text-[#B23B47] hover:bg-[#f0e4d8] cursor-pointer opacity-100" 
                                 : "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed opacity-50"
                             }`}
-                        onClick={() => {
+                        onClick={async () => {
                             if (isMatch) {
-                                console.log("Deleting hotel ID:", hotelId);
                                 if (hotelId != null) {
-                                    handleDelete(hotelId)
-                                    router.back();
+                                    await handleDelete(hotelId);
                                 }
                             }
                         }}
                     >
-                        DELETE
+                        {isDeleting ? "DELETING..." : "DELETE"}
                     </button>
                 </div>
                 
