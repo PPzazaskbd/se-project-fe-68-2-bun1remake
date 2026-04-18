@@ -91,7 +91,12 @@ function relativeTime(dateStr: string): string {
   const days = Math.floor(diff / 86400000);
   const months = Math.floor(days / 30);
   const years = Math.floor(months / 12);
-  if (years > 0) return `${years} year${years > 1 ? "s" : ""} ago`;
+  if (years > 0) {
+    const remMonths = months - years * 12;
+    if (remMonths > 0)
+      return `${years} year${years > 1 ? "s" : ""} and ${remMonths} month${remMonths > 1 ? "s" : ""} ago`;
+    return `${years} year${years > 1 ? "s" : ""} ago`;
+  }
   if (months > 0) {
     const remDays = days - months * 30;
     if (remDays > 0)
