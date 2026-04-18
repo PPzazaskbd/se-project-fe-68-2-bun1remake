@@ -59,6 +59,27 @@ function getCommentText(c: CommentItem): string {
   );
 }
 
+// Render simple markdown to HTML for display (escape HTML first to prevent XSS)
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function renderMarkdown(raw: string): string {
+  const safe = escapeHtml(raw);
+  return safe
+    // bold must come before italic to avoid partial matches
+    .replace(/\*\*([\s\S]*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/__([\s\S]*?)__/g, "<u>$1</u>")
+    .replace(/~~([\s\S]*?)~~/g, "<del>$1</del>")
+    .replace(/_([\s\S]*?)_/g, "<em>$1</em>")
+    // newlines → <br>
+    .replace(/\n/g, "<br />");
+}
+
 function relativeTime(dateStr: string): string {
   if (!dateStr) return "";
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -146,9 +167,8 @@ function ReviewCard({ c, canDel, onDelete, onExpand }: ReviewCardProps) {
       <p
         ref={textRef}
         className="mt-2 line-clamp-3 font-figma-copy text-[1rem] leading-snug text-[var(--figma-ink)]"
-      >
-        {getCommentText(c)}
-      </p>
+        dangerouslySetInnerHTML={{ __html: renderMarkdown(getCommentText(c)) }}
+      />
 
       <div className="mt-auto flex items-center justify-between gap-2 pt-3">
         {clamped ? (
@@ -297,9 +317,10 @@ function FullReviewModal({ c, canDel, onDelete, onClose }: FullReviewModalProps)
             </button>
           </div>
         </div>
-        <p className="mt-4 font-figma-copy text-[1.05rem] leading-relaxed text-[var(--figma-ink)]">
-          {getCommentText(c)}
-        </p>
+        <p
+          className="mt-4 font-figma-copy text-[1.05rem] leading-relaxed text-[var(--figma-ink)]"
+          dangerouslySetInnerHTML={{ __html: renderMarkdown(getCommentText(c)) }}
+        />
         <p className="mt-4 font-figma-copy text-[0.9rem] text-[var(--figma-ink-soft)]">
           {relativeTime(getDateField(c))}
         </p>
