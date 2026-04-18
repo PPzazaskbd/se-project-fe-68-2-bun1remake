@@ -2,6 +2,7 @@
 
 import { deleteHotel } from "@/libs/deleteHotel";
 import { createHotel } from "@/libs/createHotel";
+import { updateHotel, UpdateHotelPayload } from "@/libs/updateHotel";
 import { invalidateHotelData } from "@/libs/hotelCache";
 import { CreateHotelPayload } from "./createHotel";
 
@@ -19,10 +20,9 @@ export async function createHotelRecache(form : CreateHotelPayload, token: strin
   return { ok: true as const };
 }
 
-// TODO : update hotel recache, which will call the update hotel api and then invalidate the cache
-// skeleton code 
-// export default function updateHotelRecache() {
+export async function updateHotelRecache(hotelId: string, form: UpdateHotelPayload, token: string) {
+  await updateHotel(hotelId, form, token);
 
-//   invalidateHotelData();
-//   return { ok: true as const };
-// }
+  invalidateHotelData();
+  return { ok: true as const };
+}
