@@ -49,6 +49,7 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
   const hotelId = hotel.id || hotel._id;
   const nights = Math.max(1, calculateNights(fromDate, toDate));
   const total = hotel.price * nights;
+  const isAdmin = session?.user?.role === "admin";
   const bookingStatusLabel =
     bookingState === "arming"
       ? "Click to Cancel"
@@ -304,20 +305,40 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
                       : "BOOKING"}
                 </button>
 
-                <Link
-                  href={buildDateRangeHref("/hotel", {
-                    checkIn: fromDate,
-                    checkOut: toDate,
-                    guestsAdult,
-                    guestsChild,
-                  })}
-                  className="figma-text-action inline-flex items-center gap-2 font-figma-copy text-[1.35rem] text-[var(--figma-red)]"
-                >
-                  <span>
-                    <Arrow direction="left" />
-                  </span>
-                  <span>Go Back</span>
-                </Link>
+                <div className="flex items-center justify-between gap-3">
+                  <Link
+                    href={buildDateRangeHref("/hotel", {
+                      checkIn: fromDate,
+                      checkOut: toDate,
+                      guestsAdult,
+                      guestsChild,
+                    })}
+                    className="figma-text-action inline-flex items-center gap-2 font-figma-copy text-[1.35rem] text-[var(--figma-red)]"
+                  >
+                    <span>
+                      <Arrow direction="left" />
+                    </span>
+                    <span>Go Back</span>
+                  </Link>
+
+                  {isAdmin ? (
+                    <div className="flex items-center gap-2">
+                      <Link href={`/hotel/${hotelId}/update`}>
+                        <button className="flex h-10 w-10 items-center justify-center bg-red-700 text-white shadow transition-colors hover:bg-red-800 cursor-pointer">
+                          <img src="/edit.svg" alt="Edit icon" className="h-[18px] w-[18px]" />
+                        </button>
+                      </Link>
+
+                      <Link
+                        href={`/hotel/deleteHotel?id=${hotelId}&name=${encodeURIComponent(hotel.name)}`}
+                      >
+                        <button className="flex h-10 w-10 items-center justify-center bg-red-700 text-white shadow transition-colors hover:bg-red-800 cursor-pointer">
+                          <img src="/delete.svg" alt="Delete icon" className="h-[18px] w-[18px]" />
+                        </button>
+                      </Link>
+                    </div>
+                  ) : null}
+                </div>
 
                 <DismissibleNotice notice={notice} onClose={dismissNotice} />
               </div>
