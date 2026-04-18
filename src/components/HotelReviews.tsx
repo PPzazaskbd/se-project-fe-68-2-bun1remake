@@ -249,7 +249,7 @@ function ReviewInput({ value, onChange, onClear }: ReviewInputProps) {
       <div className="relative min-h-[6.5rem] px-4 pt-4 pb-2">
         {/* Placeholder overlay */}
         {empty && (
-          <span className="pointer-events-none absolute left-4 top-4 font-serif text-[1.05rem] italic tracking-wide text-[var(--figma-ink-soft)] select-none">
+          <span className="pointer-events-none absolute left-4 top-4 font-figma-copy text-[1.05rem] italic tracking-wide text-[var(--figma-ink-soft)] select-none">
             Add Your Comment Here
           </span>
         )}
@@ -258,7 +258,7 @@ function ReviewInput({ value, onChange, onClear }: ReviewInputProps) {
           contentEditable
           suppressContentEditableWarning
           onInput={handleInput}
-          className="relative min-h-[5rem] font-serif text-[1.05rem] leading-relaxed text-[var(--figma-ink)] focus:outline-none"
+          className="relative min-h-[5rem] font-figma-copy text-[1.05rem] leading-relaxed text-[var(--figma-ink)] focus:outline-none"
         />
       </div>
       <div className="mx-4 border-t border-[rgba(171,25,46,0.12)]" />
@@ -532,14 +532,14 @@ export default function HotelReviews({ hotelId }: HotelReviewsProps) {
               type="button"
               onClick={() => void handleSubmit()}
               disabled={isSubmitting}
-              className="figma-button w-full py-3 font-figma-copy text-[1.3rem]"
+              className="figma-button w-full py-3 font-figma-copy text-[1.3rem] normal-case tracking-normal"
             >
               {isSubmitting ? "Submitting Review..." : "Submit Review"}
             </button>
           </div>
         )}
 
-        {/* Tabs */}
+        {/* Tabs — always rendered when data exists so reviews never "disappear" */}
         {!isLoading && comments.length > 0 && (
           <div className="mt-5 flex gap-2">
             <button
