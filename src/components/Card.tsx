@@ -44,9 +44,11 @@ export default function Card({
         {isAdmin && (
           <div className="absolute right-3 top-3 flex gap-2">
             {/* ปุ่ม edit */}
-            <button className="flex h-10 w-10 items-center justify-center bg-red-700 text-white shadow hover:bg-red-800 transition-colors cursor-pointer">
-              <img src="/edit.svg" alt="Edit icon" className="h-[18px] w-[18px]" />
-            </button>
+            <Link href={`/hotel/${id}/update`}>
+              <button className="flex h-10 w-10 items-center justify-center bg-red-700 text-white shadow hover:bg-red-800 transition-colors cursor-pointer">
+                <img src="/edit.svg" alt="Edit icon" className="h-[18px] w-[18px]" />
+              </button>
+            </Link>
 
             {/* ปุ่ม delete */}
             <Link href={`/hotel/deleteHotel?id=${id}&name=${encodeURIComponent(name)}`}>

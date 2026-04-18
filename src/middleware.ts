@@ -17,5 +17,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/hotel/deleteHotel"], 
+  matcher: ["/hotel/deleteHotel" ,"/hotel/:hid/updateHotel"], 
 };
