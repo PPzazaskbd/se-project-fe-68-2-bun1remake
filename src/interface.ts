@@ -29,6 +29,12 @@ export interface UserProfile {
   __v?: number;
 }
 
+export interface HotelSpecializations {
+  location: string[];
+  facility: string[];
+  accessibility: string[];
+}
+
 export interface HotelItem {
   _id: string;
   id?: string;
@@ -42,6 +48,7 @@ export interface HotelItem {
   description: string;
   imgSrc?: string;
   price: number;
+  specializations?: HotelSpecializations;
   __v?: number;
 }
 

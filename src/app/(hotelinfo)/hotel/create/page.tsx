@@ -3,13 +3,37 @@
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
-import { createHotel } from "@/libs/createHotel";
 import type { CreateHotelPayload } from "@/libs/createHotel";
+import type { HotelSpecializations } from "@/interface";
 import Arrow from "@/components/Arrow";
 import {UploadButton} from "@/utils/uploadthing";
 import { createHotelRecache } from "@/libs/recache";
+import tagOptions from "@/data/tagOptions.json";
 
 type Tab = "image" | "info" | "tag";
+type TagCategory = keyof HotelSpecializations;
+
+const TAG_OPTIONS: Record<TagCategory, string[]> = tagOptions;
+const TAG_CATEGORY_LABELS: Record<TagCategory, string> = {
+  location: "Location",
+  facility: "Facility",
+  accessibility: "Accessibility",
+};
+
+function createEmptySpecializations(): HotelSpecializations {
+  return {
+    location: [],
+    facility: [],
+    accessibility: [],
+  };
+}
+
+function formatTagLabel(value: string) {
+  return value
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
 
 const EMPTY_FORM: CreateHotelPayload = {
   name: "",
@@ -22,6 +46,7 @@ const EMPTY_FORM: CreateHotelPayload = {
   description: "",
   imgSrc: "",
   price: 0,
+  specializations: createEmptySpecializations(),
 };
 
 const TAB_SUBTITLE: Record<Tab, string> = {
@@ -88,6 +113,14 @@ export default function CreateHotelPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+  const [tagSearch, setTagSearch] = useState("");
+
+  const selectedSpecializations = form.specializations ?? createEmptySpecializations();
+  const selectedTagCount =
+    selectedSpecializations.location.length +
+    selectedSpecializations.facility.length +
+    selectedSpecializations.accessibility.length;
+  const normalizedTagSearch = tagSearch.trim().toLowerCase();
 
   useEffect(() => {
     if (status !== "loading") {
@@ -122,6 +155,33 @@ export default function CreateHotelPage() {
       ...prev,
       [name]: name === "price" ? Number(value) : value,
     }));
+  };
+
+  const toggleTag = (category: TagCategory, value: string) => {
+    setForm((prev) => {
+      const fallbackSpecializations = createEmptySpecializations();
+      const currentSpecializations =
+        prev.specializations ?? fallbackSpecializations;
+      const valuesInCategory = currentSpecializations[category];
+      const isSelected = valuesInCategory.includes(value);
+
+      let updatedValues: string[];
+      if (isSelected) {
+        updatedValues = valuesInCategory.filter((item) => item !== value);
+      } else {
+        updatedValues = [...valuesInCategory, value];
+      }
+
+      const updatedSpecializations: HotelSpecializations = {
+        ...currentSpecializations,
+        [category]: updatedValues,
+      };
+
+      return {
+        ...prev,
+        specializations: updatedSpecializations,
+      };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -311,12 +371,86 @@ export default function CreateHotelPage() {
               )}
 
               {/* ── Tag / Pricing tab ── */}
-              {/* ── Tag tab — TODO ── */}
               {tab === "tag" && (
-                <div className="flex items-center justify-center min-h-[200px]">
-                  <p className="font-figma-copy text-[var(--figma-ink-soft)] text-[1.25rem] tracking-wide">
-                    Coming soon…
-                  </p>
+                <div className="space-y-6">
+                  <div>
+                    <input
+                      type="text"
+                      value={tagSearch}
+                      onChange={(event) => setTagSearch(event.target.value)}
+                      placeholder="Search tags"
+                      className="figma-input w-full"
+                    />
+                  </div>
+
+                  <div className="border border-[rgba(171,25,46,0.2)] bg-[rgba(255,245,244,0.6)] px-4 py-4 sm:px-6">
+                    <p className="font-figma-nav text-[1.05rem] tracking-[0.08em] text-[var(--figma-red)]">
+                      {selectedTagCount} tag{selectedTagCount === 1 ? "" : "s"} selected
+                    </p>
+
+                    {selectedTagCount > 0 ? (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {(Object.keys(TAG_OPTIONS) as TagCategory[]).flatMap((category) =>
+                          selectedSpecializations[category].map((value) => (
+                            <button
+                              key={`${category}:${value}`}
+                              type="button"
+                              onClick={() => toggleTag(category, value)}
+                              className="rounded-full bg-[rgba(255,124,124,0.35)] px-3 py-1 font-figma-copy text-[0.95rem] text-black transition-colors hover:bg-[rgba(255,124,124,0.55)]"
+                            >
+                              {formatTagLabel(value)}
+                              <span className="ml-2 text-[var(--figma-red)]">x</span>
+                            </button>
+                          )),
+                        )}
+                      </div>
+                    ) : (
+                      <p className="mt-2 font-figma-copy text-[1rem] text-[var(--figma-ink-soft)]">
+                        No tags selected yet.
+                      </p>
+                    )}
+                  </div>
+
+                  {(Object.keys(TAG_OPTIONS) as TagCategory[]).map((category) => {
+                    const visibleOptions = TAG_OPTIONS[category].filter((value) =>
+                      value.toLowerCase().includes(normalizedTagSearch),
+                    );
+
+                    return (
+                      <section key={category} className="space-y-3">
+                        <h3 className="font-figma-nav text-[1.15rem] tracking-[0.08em] text-[var(--figma-red)]">
+                          {TAG_CATEGORY_LABELS[category]}
+                        </h3>
+
+                        {visibleOptions.length > 0 ? (
+                          <div className="flex flex-wrap gap-3">
+                            {visibleOptions.map((value) => {
+                              const selected = selectedSpecializations[category].includes(value);
+
+                              return (
+                                <button
+                                  key={`${category}-${value}`}
+                                  type="button"
+                                  onClick={() => toggleTag(category, value)}
+                                  className={`rounded-full px-3 py-1 font-figma-copy text-[1rem] transition-colors ${
+                                    selected
+                                      ? "bg-[var(--figma-red)] text-[var(--figma-white)]"
+                                      : "bg-[rgba(251,239,223,0.9)] text-black hover:bg-[rgba(255,124,124,0.3)]"
+                                  }`}
+                                >
+                                  {formatTagLabel(value)}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className="font-figma-copy text-[1rem] text-[var(--figma-ink-soft)]">
+                            No matching tags in this category.
+                          </p>
+                        )}
+                      </section>
+                    );
+                  })}
                 </div>
               )}
 
