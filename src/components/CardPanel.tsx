@@ -73,11 +73,24 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
     const normalizedTerm = searchTerm.trim().toLowerCase();
     if (!normalizedTerm) return hotels;
 
-    return hotels.filter((hotel) =>
-      [hotel.name, hotel.address, hotel.province, hotel.region]
+    return hotels.filter((hotel) => {
+      const specializationValues = [
+        ...(hotel.specializations?.location ?? []),
+        ...(hotel.specializations?.facility ?? []),
+        ...(hotel.specializations?.accessibility ?? []),
+      ];
+
+      return [
+        hotel.name,
+        hotel.address,
+        hotel.district,
+        hotel.province,
+        hotel.region,
+        ...specializationValues,
+      ]
         .filter(Boolean)
-        .some((value) => value.toLowerCase().includes(normalizedTerm)),
-    );
+        .some((value) => value.toLowerCase().includes(normalizedTerm));
+    });
   }, [hotels, searchTerm]);
 
   const totalPages = Math.max(1, Math.ceil(filteredHotels.length / ITEMS_PER_PAGE));
@@ -317,7 +330,7 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
             className="figma-input mt-4 w-full"
-            placeholder="Search by hotel name, city, or address"
+            placeholder="Search by hotel name, location, address"
           />
         </div>
 
@@ -335,10 +348,11 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
                   guestsChild,
                 })}
                 name={hotel.name}
-                address={hotel.address}
+                district={hotel.district}
                 province={hotel.province}
                 price={hotel.price}
                 imgSrc={hotel.imgSrc}
+                specializations={hotel.specializations}
               />
             ))}
           </div>
@@ -348,7 +362,7 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
               NO HOTELS MATCH THIS FILTER
             </p>
             <p className="mt-2 font-figma-copy text-[1.3rem] text-[var(--figma-ink-soft)]">
-              Try a different hotel name, city, or address keyword.
+              Try a different hotel name, location, address.
             </p>
           </div>
         )}
