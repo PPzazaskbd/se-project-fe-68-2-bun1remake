@@ -28,3 +28,24 @@ export default async function AdminPage() {
     </main>
   );
 }
+
+//ไม่เกี่ยวอะไรเลย
+    // useEffect(() => {
+    //     if (status !== "loading") {
+    //         if (!session || session.user.role !== "admin") {
+    //             router.push("/"); 
+    //         }
+    //     }
+    // }, [session, status, router]);
+
+    // if (status === "loading") {
+    //     return (
+    //         <div className="flex min-h-screen items-center justify-center bg-[#FDF6EF]">
+    //             <p className="text-xl font-bold text-[#B23B47]">Loading...</p>
+    //         </div>
+    //     );
+    // }
+
+    // if (status === "unauthenticated" || session?.user?.role !== "admin") {
+    //     return <div className="min-h-screen bg-[#FDF6EF]" />; 
+    // }
