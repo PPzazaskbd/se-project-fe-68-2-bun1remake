@@ -69,17 +69,51 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
   });
   const [page, setPage] = useState(1);
 
-  const filteredHotels = useMemo(() => {
+const filteredHotels = useMemo(() => {
+  return hotels.filter((hotel) => {
+    // 1. Existing Search Term Filter
     const normalizedTerm = searchTerm.trim().toLowerCase();
-    if (!normalizedTerm) return hotels;
-
-    return hotels.filter((hotel) =>
+    const matchesSearch = !normalizedTerm || 
       [hotel.name, hotel.address, hotel.province, hotel.region]
         .filter(Boolean)
-        .some((value) => value.toLowerCase().includes(normalizedTerm)),
-    );
-  }, [hotels, searchTerm]);
+        .some((value) => value.toLowerCase().includes(normalizedTerm));
 
+    if (!matchesSearch) return false;
+
+    const specs = hotel.specializations;
+
+    // 2. Facility Tags 
+    if (selectedFilters.facility.length > 0) {
+      const hotelFacilities = (specs?.facility || []).map(f => f.toLowerCase());
+      // Check if EVERY selected filter (converted to lower) is in the hotel's list
+      const hasAll = selectedFilters.facility.every(f => 
+        hotelFacilities.includes(f.toLowerCase())
+      );
+      if (!hasAll) return false;
+    }
+
+    // 3. Location Tags 
+    if (selectedFilters.location.length > 0) {
+      const hotelLocations = (specs?.location || []).map(l => l.toLowerCase());
+      // Usually Location is an "OR" filter - show if it matches ANY selected location
+      const hasLocation = selectedFilters.location.some(l => 
+        hotelLocations.includes(l.toLowerCase())
+      );
+      if (!hasLocation) return false;
+    }
+
+    // 4. Accessibility Tags 
+    if (selectedFilters.accessibility.length > 0) {
+      const hotelAccess = (specs?.accessibility || []).map(a => a.toLowerCase());
+      const hasAllAccess = selectedFilters.accessibility.every(a => 
+        hotelAccess.includes(a.toLowerCase())
+      );
+      if (!hasAllAccess) return false;
+    }
+
+    return true;
+  });
+}, [hotels, searchTerm, selectedFilters]);
   const totalPages = Math.max(1, Math.ceil(filteredHotels.length / ITEMS_PER_PAGE));
 
   const visibleHotels = useMemo(() => {
