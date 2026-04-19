@@ -1,0 +1,5 @@
+{
+"location": ["sunset", "mountain view", "riverside", "near airport"],
+"facility": ["spa", "pool", "gym", "co-working space", "library"],
+"accessibility": ["blind", "deaf", "mobility"]
+}

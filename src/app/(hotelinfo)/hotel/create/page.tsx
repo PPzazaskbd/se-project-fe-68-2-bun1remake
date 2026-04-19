@@ -3,13 +3,37 @@
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
-import { createHotel } from "@/libs/createHotel";
 import type { CreateHotelPayload } from "@/libs/createHotel";
+import type { HotelSpecializations } from "@/interface";
 import Arrow from "@/components/Arrow";
 import {UploadButton} from "@/utils/uploadthing";
 import { createHotelRecache } from "@/libs/recache";
+import tagOptions from "@/data/tagOptions.json";
 
 type Tab = "image" | "info" | "tag";
+type TagCategory = keyof HotelSpecializations;
+
+const TAG_OPTIONS: Record<TagCategory, string[]> = tagOptions;
+const TAG_CATEGORY_LABELS: Record<TagCategory, string> = {
+  location: "Location",
+  facility: "Facility",
+  accessibility: "Accessibility",
+};
+
+function createEmptySpecializations(): HotelSpecializations {
+  return {
+    location: [],
+    facility: [],
+    accessibility: [],
+  };
+}
+
+function formatTagLabel(value: string) {
+  return value
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
 
 const EMPTY_FORM: CreateHotelPayload = {
   name: "",
@@ -22,6 +46,7 @@ const EMPTY_FORM: CreateHotelPayload = {
   description: "",
   imgSrc: "",
   price: 0,
+  specializations: createEmptySpecializations(),
 };
 
 const TAB_SUBTITLE: Record<Tab, string> = {
@@ -88,6 +113,15 @@ export default function CreateHotelPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+  const [tagSearch, setTagSearch] = useState("");
+  const [openCategory, setOpenCategory] = useState<TagCategory>("location");
+
+  const selectedSpecializations = form.specializations ?? createEmptySpecializations();
+  const selectedTagCount =
+    selectedSpecializations.location.length +
+    selectedSpecializations.facility.length +
+    selectedSpecializations.accessibility.length;
+  const normalizedTagSearch = tagSearch.trim().toLowerCase();
 
   useEffect(() => {
     if (status !== "loading") {
@@ -122,6 +156,33 @@ export default function CreateHotelPage() {
       ...prev,
       [name]: name === "price" ? Number(value) : value,
     }));
+  };
+
+  const toggleTag = (category: TagCategory, value: string) => {
+    setForm((prev) => {
+      const fallbackSpecializations = createEmptySpecializations();
+      const currentSpecializations =
+        prev.specializations ?? fallbackSpecializations;
+      const valuesInCategory = currentSpecializations[category];
+      const isSelected = valuesInCategory.includes(value);
+
+      let updatedValues: string[];
+      if (isSelected) {
+        updatedValues = valuesInCategory.filter((item) => item !== value);
+      } else {
+        updatedValues = [...valuesInCategory, value];
+      }
+
+      const updatedSpecializations: HotelSpecializations = {
+        ...currentSpecializations,
+        [category]: updatedValues,
+      };
+
+      return {
+        ...prev,
+        specializations: updatedSpecializations,
+      };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -311,12 +372,118 @@ export default function CreateHotelPage() {
               )}
 
               {/* ── Tag / Pricing tab ── */}
-              {/* ── Tag tab — TODO ── */}
               {tab === "tag" && (
-                <div className="flex items-center justify-center min-h-[200px]">
-                  <p className="font-figma-copy text-[var(--figma-ink-soft)] text-[1.25rem] tracking-wide">
-                    Coming soon…
-                  </p>
+                <div className="mx-auto flex max-w-[52rem] flex-col gap-5">
+                  <div className="border border-[#f3aaaa] bg-[rgba(254,186,207,0.15)] px-4 py-4 shadow-[inset_-4px_-4px_4px_rgba(255,255,255,0.5),inset_4px_4px_4px_rgba(133,133,133,0.25)] sm:px-6">
+                    <div className="px-1">
+                      <input
+                        type="text"
+                        value={tagSearch}
+                        onChange={(event) => setTagSearch(event.target.value)}
+                        placeholder="Search for Tags"
+                        className="w-full border-b-2 border-[#f3aaaa] bg-transparent px-1 pb-2 font-figma-nav text-[1.45rem] tracking-[0.04em] text-black placeholder:text-[#f3aaaa] focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="mt-4 max-h-[18rem] overflow-y-auto pr-1">
+                      {(Object.keys(TAG_OPTIONS) as TagCategory[]).map((category) => {
+                        const visibleOptions = TAG_OPTIONS[category].filter((value) =>
+                          value.toLowerCase().includes(normalizedTagSearch),
+                        );
+                        const isOpen = openCategory === category;
+                        const categoryCount = selectedSpecializations[category].length;
+
+                        return (
+                          <section
+                            key={category}
+                            className="mb-3 border-2 border-[#f3aaaa] bg-transparent last:mb-0"
+                          >
+                            <button
+                              type="button"
+                              onClick={() => setOpenCategory(category)}
+                              className="flex w-full items-center justify-between px-4 py-3 text-left"
+                            >
+                              <div className="flex items-center">
+                                <span className="font-figma-nav text-[1.35rem] tracking-[0.04em] text-[#ab192e]">
+                                  {TAG_CATEGORY_LABELS[category]}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <span className="font-figma-copy text-[0.95rem] text-[#ab192e]">
+                                  {categoryCount} selected
+                                </span>
+                                <span className="font-figma-nav text-[1.3rem] text-[#ab192e]">
+                                  {isOpen ? "▾" : "▸"}
+                                </span>
+                              </div>
+                            </button>
+
+                            {isOpen && (
+                              <div className="border-t border-[#f3aaaa] px-4 py-3">
+                                {visibleOptions.length > 0 ? (
+                                  <div className="flex flex-wrap gap-2">
+                                    {visibleOptions.map((value) => {
+                                      const selected = selectedSpecializations[category].includes(value);
+
+                                      return (
+                                        <button
+                                          key={`${category}-${value}`}
+                                          type="button"
+                                          onClick={() => toggleTag(category, value)}
+                                          className={`rounded-full px-3 py-[0.35rem] font-figma-nav text-[1.05rem] tracking-[0.03em] shadow-[0_4px_4px_rgba(0,0,0,0.2)] transition-colors ${
+                                            selected
+                                              ? "bg-[#ab192e] text-[#fbefdf]"
+                                              : "bg-[#fbefdf] text-black hover:bg-[rgba(255,124,124,0.35)]"
+                                          }`}
+                                        >
+                                          {formatTagLabel(value)}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                ) : (
+                                  <p className="font-figma-copy text-[1rem] text-[var(--figma-ink-soft)]">
+                                    No matching tags in this category.
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </section>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="mb-2 flex items-center gap-2 font-figma-nav text-[1.18rem] tracking-[0.08em] text-[#ab192e]">
+                      <img src="/tick.svg" alt="Selected tags" className="h-5 w-5" />
+                      {selectedTagCount} TAG{selectedTagCount === 1 ? "" : "S"} SELECTED
+                    </p>
+
+                    <div className="border-[3px] border-[#ab192e] bg-transparent px-4 py-3 sm:px-5">
+                      {selectedTagCount > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                        {(Object.keys(TAG_OPTIONS) as TagCategory[]).flatMap((category) =>
+                          selectedSpecializations[category].map((value) => (
+                            <button
+                              key={`${category}:${value}`}
+                              type="button"
+                              onClick={() => toggleTag(category, value)}
+                              className="rounded-full bg-[rgba(255,124,124,0.4)] px-3 py-[0.3rem] font-figma-nav text-[1rem] tracking-[0.02em] text-black shadow-[0_4px_4px_rgba(0,0,0,0.2)] transition-colors hover:bg-[rgba(255,124,124,0.55)]"
+                            >
+                              {formatTagLabel(value)}
+                              <span className="ml-2 text-[#ab192e]">x</span>
+                            </button>
+                          )),
+                        )}
+                        </div>
+                      ) : (
+                        <p className="font-figma-copy text-[1rem] text-[var(--figma-ink-soft)]">
+                          No tags selected yet.
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 
