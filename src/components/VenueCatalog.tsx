@@ -33,11 +33,10 @@ export default function VenueCatalog() {
           id={item._id}
           href={`/venue/${item._id}`}
           name={item.name}
-          district={item.district}
+          address={item.address}
           province={item.province}
           price={item.price}
           imgSrc={item.imgSrc}
-          specializations={item.specializations}
         />
       ))}
     </div>
