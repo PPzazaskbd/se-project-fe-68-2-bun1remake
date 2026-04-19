@@ -71,25 +71,24 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
     accessibility: [],
   });
 
-    return hotels.filter((hotel) => {
-      const specializationValues = [
-        ...(hotel.specializations?.location ?? []),
-        ...(hotel.specializations?.facility ?? []),
-        ...(hotel.specializations?.accessibility ?? []),
-      ];
-
-      return [
-        hotel.name,
-        hotel.address,
-        hotel.district,
-        hotel.province,
-        hotel.region,
-        ...specializationValues,
-      ]
-        .filter(Boolean)
-        .some((value) => value.toLowerCase().includes(normalizedTerm));
+  // --- Logic for Toggling Filters ---
+  const toggleFilter = (category: keyof FilterState, value: string) => {
+    setSelectedFilters((prev) => {
+      const current = prev[category];
+      if (Array.isArray(current)) {
+        return {
+          ...prev,
+          [category]: current.includes(value)
+            ? current.filter((item) => item !== value)
+            : [...current, value],
+        };
+      }
+      return {
+        ...prev,
+        [category]: current === value ? "" : value,
+      };
     });
-  }, [hotels, searchTerm]);
+  };
 
   // --- Logic for Filtering Hotels (Using Specializations) ---
   const filteredHotels = useMemo(() => {
@@ -238,7 +237,7 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="figma-input mt-4 w-full"
-            placeholder="Search by hotel name, location, address"
+            placeholder="Search by hotel name, city, or address"
           />
         </div>
 
@@ -254,7 +253,7 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
                   guestsAdult, guestsChild,
                 })}
                 name={hotel.name}
-                district={hotel.district}
+                district={hotel.address}
                 province={hotel.province}
                 price={hotel.price}
                 imgSrc={hotel.imgSrc}
@@ -264,11 +263,8 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
           </div>
         ) : (
           <div className="mt-10 border border-[rgba(171,25,46,0.1)] bg-[rgba(255,245,244,0.55)] px-6 py-10 text-center">
-            <p className="font-figma-nav text-[1.35rem] tracking-[0.08em] text-[var(--figma-red)]">
-              NO HOTELS MATCH THIS FILTER
-            </p>
-            <p className="mt-2 font-figma-copy text-[1.3rem] text-[var(--figma-ink-soft)]">
-              Try a different hotel name, location, address.
+            <p className="font-figma-nav text-[1.35rem] tracking-[0.08em] text-[var(--figma-red)] uppercase">
+              No hotels match this filter
             </p>
           </div>
         )}
