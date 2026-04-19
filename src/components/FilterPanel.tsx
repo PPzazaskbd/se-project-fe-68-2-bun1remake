@@ -18,7 +18,7 @@ interface FilterPanelProps {
   onToggle: (category: keyof SelectedFilters, value: string) => void;
 }
 
-// Sub-component สำหรับ Rating Button (เป๊ะตาม Figma CSS)
+//Sub-component สำหรับ Rating Button (เป๊ะตาม Figma CSS)
 const RatingButton = memo(({ value, isSelected, onClick }: { value: string; isSelected: boolean; onClick: () => void }) => {
   return (
     <button
