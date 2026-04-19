@@ -52,6 +52,16 @@ export interface HotelItem {
   __v?: number;
 }
 
+// CommentItem represents a single user review on a hotel
+export interface CommentItem {
+  _id: string;
+  commentDate: string;
+  userId: string | { _id?: string; id?: string; name?: string };
+  hotelId: string;
+  comment: string;
+  rating: number; // 1–5 star rating selected by the user
+}
+
 interface BackendReferenceItem {
   _id?: string;
   id?: string;
