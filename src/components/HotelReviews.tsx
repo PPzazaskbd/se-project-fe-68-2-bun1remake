@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { CommentItem } from "@/interface";
 import { createComment, deleteComment, getComments } from "@/libs/commentsApi";
@@ -50,15 +50,9 @@ function stars(r: number): string {
   return "★".repeat(n) + "☆".repeat(5 - n);
 }
 
-function ReviewCard({ c, canDel, onDelete, onExpand }: {
-  c: CommentItem; canDel: boolean; onDelete: (id: string) => void; onExpand: (c: CommentItem) => void;
+function ReviewCard({ c, canDel, onDelete }: {
+  c: CommentItem; canDel: boolean; onDelete: (id: string) => void;
 }) {
-  const ref = useRef<HTMLParagraphElement>(null);
-  const [clamped, setClamped] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (el) setClamped(el.scrollHeight > el.clientHeight + 2);
-  }, [c]);
   return (
     <article className="flex flex-col border border-[rgba(171,25,46,0.08)] bg-white p-4">
       <div className="flex items-start justify-between gap-2">
@@ -72,11 +66,8 @@ function ReviewCard({ c, canDel, onDelete, onExpand }: {
           </button>
         )}
       </div>
-      <p ref={ref} className="mt-2 line-clamp-3 font-figma-copy text-[1rem] leading-snug text-[var(--figma-ink)] whitespace-pre-wrap">{textOf(c)}</p>
-      <div className="mt-auto flex items-center justify-between gap-2 pt-3">
-        {clamped ? (
-          <button type="button" onClick={() => onExpand(c)} className="font-figma-copy text-[0.9rem] text-[var(--figma-red)] underline underline-offset-2">Read full review</button>
-        ) : <span />}
+      <p className="mt-2 line-clamp-3 font-figma-copy text-[1rem] leading-snug text-[var(--figma-ink)] whitespace-pre-wrap">{textOf(c)}</p>
+      <div className="mt-auto flex items-center justify-end gap-2 pt-3">
         <span className="font-figma-copy text-[0.85rem] text-[var(--figma-ink-soft)]">{relTime(dateOf(c))}</span>
       </div>
     </article>
@@ -98,7 +89,6 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
   const [rating, setRating] = useState(5);
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [modal, setModal] = useState<CommentItem | null>(null);
   const { notice, showNotice, dismissNotice } = useDismissibleNotice();
 
   const recalcAvg = (list: CommentItem[]) =>
@@ -147,7 +137,6 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
       const rest = comments.filter((c) => c._id !== id);
       setComments(rest);
       setAvg(recalcAvg(rest));
-      if (modal?._id === id) setModal(null);
     } catch (e) {
       showNotice({ type: "error", message: e instanceof Error ? e.message : "Failed to delete." });
     }
@@ -160,22 +149,6 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
 
   return (
     <>
-      {modal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 p-4" onClick={(e) => { if (e.target === e.currentTarget) setModal(null); }}>
-          <div className="relative w-full max-w-md bg-white p-6 shadow-xl">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <span className="font-figma-copy text-[1.1rem] text-[var(--figma-red)]">{stars(modal.rating)}</span>
-                <span className="font-figma-copy text-[1.1rem] text-[var(--figma-ink)]">{nameOf(modal)}</span>
-              </div>
-              <button type="button" onClick={() => setModal(null)} className="font-figma-copy text-[1.6rem] leading-none text-[var(--figma-red)]" aria-label="Close">×</button>
-            </div>
-            <p className="mt-4 font-figma-copy text-[1.05rem] leading-relaxed text-[var(--figma-ink)] whitespace-pre-wrap">{textOf(modal)}</p>
-            <p className="mt-4 font-figma-copy text-[0.9rem] text-[var(--figma-ink-soft)]">{relTime(dateOf(modal))}</p>
-          </div>
-        </div>
-      )}
-
       <section className="mt-8 border border-[rgba(171,25,46,0.08)] bg-[rgba(255,245,244,0.45)] p-5 sm:p-10">
         <div className="flex items-center justify-between gap-4">
           <h2 className="font-figma-copy text-[2rem] text-[var(--figma-ink)] sm:text-[2.5rem]">
@@ -223,7 +196,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
         ) : (
           <>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              {visible.map((c) => <ReviewCard key={c._id} c={c} canDel={canDel(c)} onDelete={(id) => void del(id)} onExpand={setModal} />)}
+              {visible.map((c) => <ReviewCard key={c._id} c={c} canDel={canDel(c)} onDelete={(id) => void del(id)} />)}
             </div>
             {totalPages > 1 && (
               <div className="mt-6 flex items-center gap-3">
