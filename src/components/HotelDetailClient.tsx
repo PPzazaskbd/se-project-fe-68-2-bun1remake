@@ -1,7 +1,6 @@
 "use client";
 
 import DismissibleNotice from "@/components/DismissibleNotice";
-import HotelReviews from "@/components/HotelReviews";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -346,7 +345,6 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
             </div>
           </div>
         </section>
-        <HotelReviews hotelId={hotelId} />
       </div>
     </main>
   );
