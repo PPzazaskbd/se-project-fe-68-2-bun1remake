@@ -33,10 +33,11 @@ export default function VenueCatalogClient() {
           id={item.id || item._id}
           href={`/venue/${item.id || item._id}`}
           name={item.name}
-          address={item.address}
+          district={item.district}
           province={item.province}
           price={item.price}
           imgSrc={item.imgSrc}
+          specializations={item.specializations}
         />
       ))}
     </div>
