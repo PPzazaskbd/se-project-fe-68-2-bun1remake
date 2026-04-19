@@ -1,51 +1,26 @@
 import Link from "next/link";
-import type { HotelSpecializations } from "@/interface";
-
-function formatTagLabel(value: string) {
-  return value
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
 
 interface CardProps {
   id: string;
   href: string;
   name: string;
-  district: string;
+  address: string;
   province: string;
   price: number;
   imgSrc?: string;
   isAdmin?: boolean;
-  specializations?: HotelSpecializations;
 }
 
 export default function Card({
   href,
   name,
-  district,
+  address,
   province,
   price,
   imgSrc,
   isAdmin,
   id,
-  specializations,
 }: CardProps) {
-  const allTags = Array.from(
-    new Set(
-      [
-        ...(specializations?.location ?? []),
-        ...(specializations?.facility ?? []),
-        ...(specializations?.accessibility ?? []),
-      ]
-        .map((value) => value.trim())
-        .filter(Boolean),
-    ),
-  );
-
-  const previewTags = allTags.slice(0, 2);
-  const hiddenTagCount = allTags.length - previewTags.length;
-
   return (
     <article className="figma-card-surface border border-[rgba(171,25,46,0.08)] bg-[#fff8f3]">
       <div className="relative block">
@@ -94,46 +69,25 @@ export default function Card({
         Delete
       </button> */}
 
-      <div className="px-5 py-4 sm:px-6">
-        <h2 className="truncate font-figma-copy text-[1.9rem] text-[var(--figma-ink)] sm:text-[2rem]">
-          {name}
-        </h2>
-
-        <p className="mt-1 font-figma-copy text-[1rem] text-[var(--figma-ink-soft)] sm:text-[1.15rem]">
-          {[province, district].filter(Boolean).join(" - ")}
-        </p>
-
-        <div className="mt-3 flex items-end justify-between gap-4">
-          <div className="min-h-[2rem] flex items-center gap-2">
-            {previewTags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full bg-[#AB192E] px-3 py-[0.35rem] font-figma-nav text-[0.8rem] tracking-[0.03em] text-[#FBEFDF] shadow-[0_4px_4px_rgba(0,0,0,0.15)] sm:text-[0.9rem]"
-              >
-                {formatTagLabel(tag)}
-              </span>
-            ))}
-
-            {hiddenTagCount > 0 ? (
-              <span className="rounded-full bg-[#AB192E] px-3 py-[0.35rem] font-figma-nav text-[0.8rem] tracking-[0.03em] text-[#FBEFDF] sm:text-[0.9rem]">
-                +{hiddenTagCount}
-              </span>
-            ) : null}
-          </div>
-
-          <div className="ml-auto flex shrink-0 items-end gap-3">
-            <p className="font-figma-copy text-[1rem] whitespace-nowrap text-[var(--figma-red)] sm:text-[1.1rem]">
-              ${price.toLocaleString()} per night
-            </p>
-
-            <Link
-              href={href}
-              className="figma-button figma-card-detail-button px-4 py-1 font-figma-copy text-[1.15rem] normal-case sm:px-5 sm:text-[1.25rem]"
-            >
-              detail
-            </Link>
-          </div>
+      <div className="flex items-end justify-between gap-4 px-5 py-4 sm:px-6">
+        <div className="min-w-0">
+          <h2 className="truncate font-figma-copy text-[1.9rem] text-[var(--figma-ink)] sm:text-[2rem]">
+            {name}
+          </h2>
+          <p className="font-figma-copy text-[1rem] text-[var(--figma-ink-soft)] sm:text-[1.15rem]">
+            {province} - {address}
+          </p>
+          <p className="mt-1 font-figma-copy text-[1rem] text-[var(--figma-red)] sm:text-[1.1rem]">
+            ${price.toLocaleString()} per night
+          </p>
         </div>
+
+        <Link
+          href={href}
+          className="figma-button figma-card-detail-button px-4 py-1 font-figma-copy text-[1.15rem] normal-case sm:px-5 sm:text-[1.25rem]"
+        >
+          detail
+        </Link>
       </div>
     </article>
   );
