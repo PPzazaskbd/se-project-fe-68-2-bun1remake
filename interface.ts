@@ -1,1 +1,1 @@
-// depracated, not used anymore, but kept for reference
+//depracated, not used anymore, but kept for reference
