@@ -8,7 +8,6 @@ import Card from "./Card";
 import DateRangeToolbar from "./DateRangeToolbar";
 import PaginationControls from "./PaginationControls";
 import { getTodayIsoDate } from "@/libs/bookingStorage";
-import FilterPanel from "./FilterPanel";
 import {
   buildDateRangeHref,
   createDateRangeSearchParams,
@@ -18,15 +17,6 @@ import {
 import Link from "next/link";
 
 const ITEMS_PER_PAGE = 4;
-
-type FilterState = {
-  rating: string;
-  priceRange: string;
-  accommodationType: string[];
-  facility: string[];
-  location: string[];
-  accessibility: string[];
-};
 
 function isEditableTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false;
@@ -57,16 +47,6 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
   const [guestsAdult, setGuestsAdult] = useState(urlDateRange.guestsAdult);
   const [guestsChild, setGuestsChild] = useState(urlDateRange.guestsChild);
   const [searchTerm, setSearchTerm] = useState("");
-  //filter
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState<FilterState>({
-    rating: "" as string,
-    priceRange: "" as string,
-    accommodationType: [] as string[],
-    facility: [] as string[],
-    location: [] as string[],
-    accessibility: [] as string[],
-  });
   const [page, setPage] = useState(1);
 
   const filteredHotels = useMemo(() => {
@@ -99,8 +79,6 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
     const start = (page - 1) * ITEMS_PER_PAGE;
     return filteredHotels.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredHotels, page]);
-
-  
 
   useEffect(() => {
     setPage(1);
@@ -191,52 +169,7 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
     );
   }
 
-  const toggleFilter = (category: keyof typeof selectedFilters, value: string) => {
-    const isSingleSelect = category === "rating" || category === "priceRange";
-    let nextValue: string | string[];
-
-    if (isSingleSelect) {
-      nextValue = (selectedFilters[category] as string) === value ? "" : value;
-    } else {
-      const current = selectedFilters[category] as string[];
-      nextValue = current.includes(value)
-        ? current.filter((item: string) => item !== value)
-        : [...current, value];
-    }
-
-    setSelectedFilters((prev: FilterState) => ({
-      ...prev,
-      [category]: nextValue,
-    }));
-
-    const params = new URLSearchParams(searchParams.toString());
-    const queryKey = category === "rating" ? "review" : (category as string);
-
-    const PRICE_MAP: Record<string, string> = {
-      "$": "1", "$$": "2", "$$$": "3", "$$$+": "4"
-    };
-
-    if (Array.isArray(nextValue)) {
-      if (nextValue.length > 0) {
-        params.set(queryKey, nextValue.join(","));
-      } else {
-        params.delete(queryKey);
-      }
-    } else {
-      const queryValue = category === "priceRange" && nextValue
-        ? PRICE_MAP[nextValue] ?? nextValue
-        : nextValue;
-        
-      if (nextValue) {
-        params.set(queryKey, nextValue);
-      } else {
-        params.delete(queryKey);
-      }
-    }
-
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  };  
-    
+  
 
   return (
     <section className="figma-page py-6 sm:py-8">
@@ -273,40 +206,6 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
             </div>
 
             <div className="flex items-center gap-3">
-
-              <button 
-              //ปุ่ม filter
-                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                style={{ fontFamily: "'Cormorant Infant', serif" }}
-                className={`
-                  flex items-center justify-center gap-2
-                  w-[120px] h-[60px] 
-                  transition-all duration-300
-                  drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)]
-                  border-[1px] border-[#AB192E]
-                  ${isFilterOpen 
-                    ? "bg-[#AB192E] text-[#FDF1E8]" 
-                    : "bg-[#FDF1E8] text-[#AB192E]" 
-                  }
-                `}
-              >
-                <svg 
-                  width="32" 
-                  height="32" 
-                  viewBox="20 16 28 28" 
-                  fill="none" 
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path 
-                    d="M46 18H22L31.6 30.6133V39.3333L36.4 42V30.6133L46 18Z" 
-                    stroke="currentColor" 
-                    strokeWidth="2.5" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span className="text-[24px] leading-[29px] font-[400]">Filter</span>
-              </button>
               
               {isAdmin && (
                 <Link href="/hotel/create">
@@ -317,14 +216,9 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
                 </Link>
               )}
             </div>
+
           </div>
           
-          <FilterPanel 
-            isOpen={isFilterOpen} 
-            selectedFilters={selectedFilters} 
-            onToggle={toggleFilter} 
-          />
-
           <input
             type="text"
             value={searchTerm}
