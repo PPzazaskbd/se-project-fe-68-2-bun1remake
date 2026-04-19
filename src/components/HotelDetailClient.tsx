@@ -1,6 +1,7 @@
 "use client";
 
 import DismissibleNotice from "@/components/DismissibleNotice";
+import HotelReviews from "@/components/HotelReviews";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -28,6 +29,13 @@ function generateRandomRoomNumber() {
   return String(Math.floor(Math.random() * 999) + 1).padStart(3, "0");
 }
 
+function formatTagLabel(value: string) {
+  return value
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
   const { data: session, update } = useSession();
   const pathname = usePathname();
@@ -47,6 +55,17 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
   const { notice, showNotice, dismissNotice } = useDismissibleNotice();
   const bookingTimerRef = useRef<number | null>(null);
   const hotelId = hotel.id || hotel._id;
+  const allTags = Array.from(
+    new Set(
+      [
+        ...(hotel.specializations?.location ?? []),
+        ...(hotel.specializations?.facility ?? []),
+        ...(hotel.specializations?.accessibility ?? []),
+      ]
+        .map((value) => value.trim())
+        .filter(Boolean),
+    ),
+  );
   const nights = Math.max(1, calculateNights(fromDate, toDate));
   const total = hotel.price * nights;
   const isAdmin = session?.user?.role === "admin";
@@ -240,6 +259,19 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
                 <span className="pt-1 text-[var(--figma-red)]">+</span>
                 <span>{hotel.address}</span>
               </p>
+
+              {allTags.length > 0 ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {allTags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full bg-[#AB192E] px-3 py-[0.35rem] font-figma-nav text-[0.9rem] tracking-[0.03em] text-[#FBEFDF] shadow-[0_4px_4px_rgba(0,0,0,0.15)] sm:text-[1rem]"
+                    >
+                      {formatTagLabel(tag)}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
             </div>
 
             <div className="flex flex-col justify-between gap-8">
@@ -345,6 +377,7 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
             </div>
           </div>
         </section>
+        <HotelReviews hotelId={hotelId} />
       </div>
     </main>
   );
