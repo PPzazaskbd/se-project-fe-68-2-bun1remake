@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import { CommentItem } from "@/interface";
 import { createComment, deleteComment, getComments } from "@/libs/commentsApi";
 import { useDismissibleNotice } from "@/libs/useDismissibleNotice";
@@ -42,6 +46,167 @@ function stars(r: number): string {
   return "★".repeat(n) + "☆".repeat(5 - n);
 }
 
+type InlineFormat = "bold" | "italic" | "underline" | "strikethrough";
+type FormatState = Record<InlineFormat, boolean>;
+
+const FORMAT_BUTTONS: Array<{
+  kind: InlineFormat;
+  glyph: string;
+  className?: string;
+  ariaLabel: string;
+}> = [
+  { kind: "bold", glyph: "B", ariaLabel: "Apply bold" },
+  { kind: "italic", glyph: "I", className: "italic", ariaLabel: "Apply italic" },
+  { kind: "underline", glyph: "U", className: "underline", ariaLabel: "Apply underline" },
+  {
+    kind: "strikethrough",
+    glyph: "S",
+    className: "line-through [text-decoration-skip-ink:none]",
+    ariaLabel: "Apply strikethrough",
+  },
+];
+
+function emptyFormatState(): FormatState {
+  return {
+    bold: false,
+    italic: false,
+    underline: false,
+    strikethrough: false,
+  };
+}
+
+function commandFor(kind: InlineFormat): "bold" | "italic" | "underline" | "strikeThrough" {
+  switch (kind) {
+    case "bold":
+      return "bold";
+    case "italic":
+      return "italic";
+    case "underline":
+      return "underline";
+    case "strikethrough":
+      return "strikeThrough";
+  }
+}
+
+function wrapTagged(content: string, tag: "strong" | "em" | "u" | "s"): string {
+  if (!content) return "";
+
+  const leading = content.match(/^\s*/)?.[0] || "";
+  const trailing = content.match(/\s*$/)?.[0] || "";
+  const core = content.slice(leading.length, content.length - trailing.length);
+
+  if (!core) return content;
+  return `${leading}<${tag}>${core}</${tag}>${trailing}`;
+}
+
+const reviewSanitizeSchema = {
+  ...defaultSchema,
+  tagNames: [...(defaultSchema.tagNames || []), "u", "s"],
+};
+
+function serializeEditorNode(node: Node): string {
+  if (node.nodeType === Node.TEXT_NODE) {
+    return (node.textContent || "").replace(/\u200B/g, "");
+  }
+
+  if (node.nodeType !== Node.ELEMENT_NODE) return "";
+
+  const el = node as HTMLElement;
+  const inner = Array.from(el.childNodes).map(serializeEditorNode).join("");
+
+  if (el.tagName === "SPAN") {
+    let styled = inner;
+    const fontWeight = Number.parseInt(el.style.fontWeight || "", 10);
+    const isBold = Number.isFinite(fontWeight)
+      ? fontWeight >= 600
+      : /(bold|bolder)/i.test(el.style.fontWeight || "");
+
+    if (isBold) styled = wrapTagged(styled, "strong");
+    if (el.style.fontStyle === "italic") styled = wrapTagged(styled, "em");
+
+    const decoration = `${el.style.textDecoration} ${el.style.textDecorationLine}`.toLowerCase();
+    if (decoration.includes("line-through")) styled = wrapTagged(styled, "s");
+    if (decoration.includes("underline")) styled = wrapTagged(styled, "u");
+
+    return styled;
+  }
+
+  switch (el.tagName) {
+    case "BR":
+      return "\n";
+    case "STRONG":
+    case "B":
+      return inner ? wrapTagged(inner, "strong") : "";
+    case "EM":
+    case "I":
+      return inner ? wrapTagged(inner, "em") : "";
+    case "U":
+      return inner ? wrapTagged(inner, "u") : "";
+    case "S":
+    case "STRIKE":
+    case "DEL":
+      return inner ? wrapTagged(inner, "s") : "";
+    case "DIV":
+    case "P":
+      return `${inner}\n`;
+    default:
+      return inner;
+  }
+}
+
+function serializeEditorContent(root: HTMLElement): string {
+  return Array.from(root.childNodes)
+    .map(serializeEditorNode)
+    .join("")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .trim();
+}
+
+function ensureSelectionInEditor(root: HTMLElement) {
+  const selection = window.getSelection();
+  if (!selection) return;
+
+  const inEditor =
+    selection.rangeCount > 0 &&
+    root.contains(selection.getRangeAt(0).commonAncestorContainer);
+
+  if (inEditor) return;
+
+  const range = document.createRange();
+  range.selectNodeContents(root);
+  range.collapse(false);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+function applyInlineStyle(root: HTMLElement, kind: InlineFormat) {
+  root.focus();
+  ensureSelectionInEditor(root);
+  document.execCommand(commandFor(kind));
+}
+
+function renderReviewText(input: string) {
+  if (!input) return null;
+
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      rehypePlugins={[rehypeRaw, [rehypeSanitize, reviewSanitizeSchema]]}
+      components={{
+        p: ({ children }) => <>{children}</>,
+        strong: ({ children }) => <strong>{children}</strong>,
+        em: ({ children }) => <em>{children}</em>,
+        s: ({ children }) => <span className="line-through">{children}</span>,
+        del: ({ children }) => <span className="line-through">{children}</span>,
+        u: ({ children }) => <span className="underline">{children}</span>,
+      }}
+    >
+      {input}
+    </ReactMarkdown>
+  );
+}
+
 function ReviewCard({ c, canDel, onDelete }: {
   c: CommentItem; canDel: boolean; onDelete: (id: string) => void;
 }) {
@@ -58,7 +223,9 @@ function ReviewCard({ c, canDel, onDelete }: {
           </button>
         )}
       </div>
-      <p className="mt-2 line-clamp-3 font-figma-copy text-[1rem] leading-snug text-[var(--figma-ink)] whitespace-pre-wrap">{textOf(c)}</p>
+      <div className="mt-2 line-clamp-3 wrap-break-word font-figma-copy text-[1rem] leading-snug text-[var(--figma-ink)]">
+        {renderReviewText(textOf(c))}
+      </div>
       <p className="mt-auto pt-3 text-right font-figma-copy text-[0.85rem] text-[var(--figma-ink-soft)]">{relTime(dateOf(c))}</p>
     </article>
   );
@@ -79,6 +246,8 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
   const [rating, setRating] = useState(5);
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [activeFormats, setActiveFormats] = useState<FormatState>(emptyFormatState());
+  const editorRef = useRef<HTMLDivElement | null>(null);
   const { notice, showNotice, dismissNotice } = useDismissibleNotice();
 
   const recalcAvg = (list: CommentItem[]) =>
@@ -102,20 +271,79 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
 
   const canDel = (c: CommentItem) => role === "admin" || (role === "user" && !!uid && userIdOf(c) === uid);
 
+  const syncTextFromEditor = () => {
+    const editor = editorRef.current;
+    const next = editor ? serializeEditorContent(editor) : "";
+    setText(next);
+    return next;
+  };
+
+  const refreshActiveFormats = () => {
+    const editor = editorRef.current;
+    if (!editor) {
+      setActiveFormats(emptyFormatState());
+      return;
+    }
+
+    const selection = window.getSelection();
+    const inEditor =
+      !!selection &&
+      selection.rangeCount > 0 &&
+      editor.contains(selection.getRangeAt(0).commonAncestorContainer);
+
+    if (!inEditor) {
+      setActiveFormats(emptyFormatState());
+      return;
+    }
+
+    const query = (command: "bold" | "italic" | "underline" | "strikeThrough") => {
+      try {
+        return document.queryCommandState(command);
+      } catch {
+        return false;
+      }
+    };
+
+    setActiveFormats({
+      bold: query("bold"),
+      italic: query("italic"),
+      underline: query("underline"),
+      strikethrough: query("strikeThrough"),
+    });
+  };
+
+  const applyInlineFormat = (kind: InlineFormat) => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    editor.focus();
+    applyInlineStyle(editor, kind);
+    syncTextFromEditor();
+    refreshActiveFormats();
+  };
+
+  const toggleForm = () => {
+    if (showForm && editorRef.current) {
+      editorRef.current.innerHTML = "";
+      setText("");
+      setActiveFormats(emptyFormatState());
+    }
+    setShowForm((v) => !v);
+  };
+
   const submit = async () => {
-    console.log("token:", token);
-  console.log("text:", text);
-  console.log("rating:", rating);
+    const latestText = syncTextFromEditor();
     if (!token) return;
-    if (!text.trim()) return showNotice({ type: "error", message: "Please write a comment." });
+    if (!latestText.trim()) return showNotice({ type: "error", message: "Please write a comment." });
     setSubmitting(true);
     try {
-      const r = await createComment(hotelId, token, { comment: text.trim(), rating });
+      const r = await createComment(hotelId, token, { comment: latestText.trim(), rating });
       if (r?.data) {
         const updated = [r.data, ...comments];
         setComments(updated);
         setAvg(recalcAvg(updated));
       }
+      if (editorRef.current) editorRef.current.innerHTML = "";
+      setActiveFormats(emptyFormatState());
       setText(""); setRating(5); setShowForm(false);
       showNotice({ type: "success", message: "Review submitted." });
     } catch (e) {
@@ -148,7 +376,12 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
             Reviews ({comments.length}){avg !== null && <span className="ml-2 text-[var(--figma-red)]">{avg.toFixed(1)}★</span>}
           </h2>
           {token && (
-            <button type="button" onClick={() => setShowForm((v) => !v)} className="flex h-9 w-9 shrink-0 items-center justify-center bg-[var(--figma-red)] text-white font-figma-copy text-[1.4rem] leading-none" aria-label={showForm ? "Close" : "Write a review"}>
+            <button
+              type="button"
+              onClick={toggleForm}
+              className="flex h-12 w-12 shrink-0 items-center justify-center border border-[var(--figma-bg)] bg-[var(--figma-red-strong)] text-white font-figma-copy text-[2rem] leading-none sm:h-14 sm:w-14"
+              aria-label={showForm ? "Close" : "Write a review"}
+            >
               {showForm ? "×" : "+"}
             </button>
           )}
@@ -164,8 +397,50 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
                 ))}
               </div>
             </div>
-            <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Add Your Comment Here" rows={4}
-              className="w-full resize-none border border-[rgba(171,25,46,0.15)] bg-[rgba(255,245,244,0.6)] p-4 font-figma-copy text-[1.05rem] text-[var(--figma-ink)] placeholder:italic placeholder:text-[var(--figma-ink-soft)] focus:outline-none" />
+            <div className="border border-[rgba(171,25,46,0.18)] bg-[rgba(255,245,244,0.6)]">
+              <div className="relative">
+                {text.trim().length === 0 && (
+                  <span className="pointer-events-none absolute left-4 top-4 font-figma-copy text-[1.05rem] text-[rgba(250,170,170,0.95)]">
+                    Add Your Comment Here
+                  </span>
+                )}
+                <div
+                  ref={editorRef}
+                  contentEditable
+                  role="textbox"
+                  aria-label="Add your comment"
+                  onInput={() => {
+                    syncTextFromEditor();
+                    refreshActiveFormats();
+                  }}
+                  onBlur={() => {
+                    syncTextFromEditor();
+                    setActiveFormats(emptyFormatState());
+                  }}
+                  onFocus={refreshActiveFormats}
+                  onKeyUp={refreshActiveFormats}
+                  onMouseUp={refreshActiveFormats}
+                  suppressContentEditableWarning
+                  className="min-h-[140px] w-full whitespace-pre-wrap break-words bg-transparent p-4 font-figma-copy text-[1.05rem] text-[var(--figma-ink)] focus:outline-none"
+                />
+              </div>
+              <div className="border-t border-[rgba(171,25,46,0.2)] px-4 py-2">
+                <div className="flex flex-wrap items-center gap-5">
+                  {FORMAT_BUTTONS.map((btn) => (
+                    <button
+                      key={btn.kind}
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => applyInlineFormat(btn.kind)}
+                      className={`flex h-9 min-w-9 items-center justify-center border px-2 font-figma-nav text-[1.7rem] transition-colors ${activeFormats[btn.kind] ? "border-[#B71422] bg-[#B71422] text-[#FBEFDF]" : "border-transparent text-[rgba(250,170,170,0.95)] hover:text-[var(--figma-red)]"} ${btn.className || ""}`}
+                      aria-label={btn.ariaLabel}
+                    >
+                      {btn.glyph}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
             <DismissibleNotice notice={notice} onClose={dismissNotice} />
             <button type="button" onClick={() => void submit()} disabled={submitting} className="figma-button w-full py-3 font-figma-copy text-[1.3rem] normal-case tracking-normal">
               {submitting ? "Submitting..." : "Submit Review"}
@@ -201,11 +476,11 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
           </>
         )}
 
-        {!token && (
+        {/* {!token && (
           <p className="mt-6 border-t border-[rgba(171,25,46,0.12)] pt-6 font-figma-copy text-[1.2rem] text-[var(--figma-ink-soft)]">
             <a href="/login" className="figma-link">Sign in</a> to leave a review.
           </p>
-        )}
+        )} */}
       </section>
     </>
   );
