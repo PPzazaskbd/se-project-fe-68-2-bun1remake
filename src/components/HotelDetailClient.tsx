@@ -11,6 +11,7 @@ import DateRangeToolbar from "./DateRangeToolbar";
 import Arrow from "./Arrow";
 import { calculateNights, getTodayIsoDate } from "@/libs/bookingStorage";
 import { createBooking } from "@/libs/bookingsApi";
+import HotelReviews from "./HotelReviews";
 import {
   buildDateRangeHref,
   createDateRangeSearchParams,
@@ -376,6 +377,9 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
             </div>
           </div>
         </section>
+      </div>
+      <div className="figma-shell">
+        <HotelReviews hotelId={hotelId} />
       </div>
     </main>
   );

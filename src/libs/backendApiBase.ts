@@ -1,5 +1,5 @@
-const DEFAULT_BACKEND_ORIGIN = "https://backend-bun1-remake.vercel.app";
-const DEFAULT_BACKEND_API_PREFIX = "/api/v1";
+const DEFAULT_BACKEND_ORIGIN = "https://se-project-be-68-2-bun1remake.vercel.app/";
+const DEFAULT_BACKEND_API_PREFIX = "api/v1";
 const DEFAULT_BACKEND_API_BASE = `${DEFAULT_BACKEND_ORIGIN}${DEFAULT_BACKEND_API_PREFIX}`;
 
 function normalizeBackendApiBase(value: string | undefined) {
