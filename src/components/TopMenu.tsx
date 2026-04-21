@@ -5,6 +5,7 @@ import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { useLayoutEffect, useRef, useState } from "react";
+import RandomHotelButton from "./RandomHotelButton";
 
 type NavKey = "hotels" | "bookings" | "profile" | "auth";
 
@@ -33,7 +34,8 @@ function getLinkClass(isCurrent: boolean) {
 export default function TopMenu() {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const isAdmin = (session?.user as { role?: string } | undefined)?.role === "admin";
+  const isAdmin =
+    (session?.user as { role?: string } | undefined)?.role === "admin";
   const bookingsHref = isAdmin ? "/admin" : "/mybooking";
   const bookingsLinkHref = session
     ? bookingsHref
@@ -47,16 +49,18 @@ export default function TopMenu() {
   const isProfileActive = pathname === "/profile";
   const isAuthActive =
     !session &&
-    (pathname === "/login" || pathname === "/register" || pathname === "/verify-otp");
+    (pathname === "/login" ||
+      pathname === "/register" ||
+      pathname === "/verify-otp");
   const activeKey: NavKey | null = isHotelsActive
     ? "hotels"
     : isBookingsActive
       ? "bookings"
       : isProfileActive
         ? "profile"
-      : isAuthActive
-        ? "auth"
-        : null;
+        : isAuthActive
+          ? "auth"
+          : null;
 
   const shellRef = useRef<HTMLDivElement>(null);
   const linkRefs = useRef<Partial<Record<NavKey, HTMLElement | null>>>({});
@@ -159,6 +163,7 @@ export default function TopMenu() {
             >
               HOTELS
             </Link>
+            <RandomHotelButton />
           </div>
         </div>
 
@@ -172,6 +177,12 @@ export default function TopMenu() {
           >
             BOOKINGS
           </Link>
+
+          <span
+            aria-hidden="true"
+            className="hidden h-8 w-px sm:block"
+            style={{ background: "rgba(171, 25, 46, 0.28)" }}
+          />
 
           {session ? (
             <button

@@ -17,7 +17,8 @@ type UserLike = { _id?: string; name?: string };
 function userObj(c: CommentItem): UserLike | null {
   return (typeof c.user === "object" ? c.user : null) as UserLike | null;
 }
-const userIdOf = (c: CommentItem) => typeof c.user === "string" ? c.user : (userObj(c)?._id || "");
+const userIdOf = (c: CommentItem) =>
+  typeof c.user === "string" ? c.user : userObj(c)?._id || "";
 const nameOf = (c: CommentItem) => userObj(c)?.name || "Guest";
 const textOf = (c: CommentItem) => c.text || c.comment || "";
 const dateOf = (c: CommentItem) => c.createdAt || c.commentDate || "";
@@ -38,7 +39,8 @@ function relTime(d: string): string {
   if (months > 0) return two(months, "month", days - months * 30, "day");
   if (days > 0) return two(days, "day", hours - days * 24, "hour");
   if (hours > 0) return two(hours, "hour", minutes - hours * 60, "minute");
-  if (minutes > 0) return two(minutes, "minute", seconds - minutes * 60, "second");
+  if (minutes > 0)
+    return two(minutes, "minute", seconds - minutes * 60, "second");
   return "just now";
 }
 function stars(r: number): string {
@@ -56,8 +58,18 @@ const FORMAT_BUTTONS: Array<{
   ariaLabel: string;
 }> = [
   { kind: "bold", glyph: "B", ariaLabel: "Apply bold" },
-  { kind: "italic", glyph: "I", className: "italic", ariaLabel: "Apply italic" },
-  { kind: "underline", glyph: "U", className: "underline", ariaLabel: "Apply underline" },
+  {
+    kind: "italic",
+    glyph: "I",
+    className: "italic",
+    ariaLabel: "Apply italic",
+  },
+  {
+    kind: "underline",
+    glyph: "U",
+    className: "underline",
+    ariaLabel: "Apply underline",
+  },
   {
     kind: "strikethrough",
     glyph: "S",
@@ -75,7 +87,9 @@ function emptyFormatState(): FormatState {
   };
 }
 
-function commandFor(kind: InlineFormat): "bold" | "italic" | "underline" | "strikeThrough" {
+function commandFor(
+  kind: InlineFormat,
+): "bold" | "italic" | "underline" | "strikeThrough" {
   switch (kind) {
     case "bold":
       return "bold";
@@ -124,7 +138,8 @@ function serializeEditorNode(node: Node): string {
     if (isBold) styled = wrapTagged(styled, "strong");
     if (el.style.fontStyle === "italic") styled = wrapTagged(styled, "em");
 
-    const decoration = `${el.style.textDecoration} ${el.style.textDecorationLine}`.toLowerCase();
+    const decoration =
+      `${el.style.textDecoration} ${el.style.textDecorationLine}`.toLowerCase();
     if (decoration.includes("line-through")) styled = wrapTagged(styled, "s");
     if (decoration.includes("underline")) styled = wrapTagged(styled, "u");
 
@@ -207,26 +222,51 @@ function renderReviewText(input: string) {
   );
 }
 
-function ReviewCard({ c, canDel, onDelete }: {
-  c: CommentItem; canDel: boolean; onDelete: (id: string) => void;
+function ReviewCard({
+  c,
+  canDel,
+  onDelete,
+}: {
+  c: CommentItem;
+  canDel: boolean;
+  onDelete: (id: string) => void;
 }) {
   return (
     <article className="flex flex-col border border-[rgba(171,25,46,0.08)] bg-white p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="font-figma-copy text-[1.05rem] text-[var(--figma-red)]">{stars(c.rating)}</span>
-          <span className="font-figma-copy text-[1rem] text-[var(--figma-ink)]">{nameOf(c)}</span>
+          <span className="font-figma-copy text-[1.05rem] text-[var(--figma-red)]">
+            {stars(c.rating)}
+          </span>
+          <span className="font-figma-copy text-[1rem] text-[var(--figma-ink)]">
+            {nameOf(c)}
+          </span>
         </div>
         {canDel && (
-          <button type="button" onClick={() => onDelete(c._id)} className="shrink-0 text-[var(--figma-red)] opacity-60 hover:opacity-100" aria-label="Delete review">
-            <svg width="14" height="16" viewBox="0 0 14 16" fill="none"><path d="M1 4h12M5 4V2h4v2M2 4l1 10h8l1-10H2z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <button
+            type="button"
+            onClick={() => onDelete(c._id)}
+            className="shrink-0 text-[var(--figma-red)] opacity-60 hover:opacity-100"
+            aria-label="Delete review"
+          >
+            <svg width="14" height="16" viewBox="0 0 14 16" fill="none">
+              <path
+                d="M1 4h12M5 4V2h4v2M2 4l1 10h8l1-10H2z"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
         )}
       </div>
       <div className="mt-2 line-clamp-3 wrap-break-word font-figma-copy text-[1rem] leading-snug text-[var(--figma-ink)]">
         {renderReviewText(textOf(c))}
       </div>
-      <p className="mt-auto pt-3 text-right font-figma-copy text-[0.85rem] text-[var(--figma-ink-soft)]">{relTime(dateOf(c))}</p>
+      <p className="mt-auto pt-3 text-right font-figma-copy text-[0.85rem] text-[var(--figma-ink-soft)]">
+        {relTime(dateOf(c))}
+      </p>
     </article>
   );
 }
@@ -246,12 +286,19 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
   const [rating, setRating] = useState(5);
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [activeFormats, setActiveFormats] = useState<FormatState>(emptyFormatState());
+  const [activeFormats, setActiveFormats] =
+    useState<FormatState>(emptyFormatState());
   const editorRef = useRef<HTMLDivElement | null>(null);
   const { notice, showNotice, dismissNotice } = useDismissibleNotice();
 
   const recalcAvg = (list: CommentItem[]) =>
-    list.length === 0 ? null : parseFloat((list.reduce((s, c) => s + (Number(c.rating) || 0), 0) / list.length).toFixed(2));
+    list.length === 0
+      ? null
+      : parseFloat(
+          (
+            list.reduce((s, c) => s + (Number(c.rating) || 0), 0) / list.length
+          ).toFixed(2),
+        );
 
   useEffect(() => {
     if (!hotelId) return;
@@ -262,14 +309,25 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
         if (ignore) return;
         const list = Array.isArray(d?.data) ? d.data : [];
         setComments(list);
-        setAvg(typeof d?.averageRating === "number" ? d.averageRating : recalcAvg(list));
+        setAvg(
+          typeof d?.averageRating === "number"
+            ? d.averageRating
+            : recalcAvg(list),
+        );
       })
-      .catch(() => { if (!ignore) setComments([]); })
-      .finally(() => { if (!ignore) setLoading(false); });
-    return () => { ignore = true; };
+      .catch(() => {
+        if (!ignore) setComments([]);
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
   }, [hotelId]);
 
-  const canDel = (c: CommentItem) => role === "admin" || (role === "user" && !!uid && userIdOf(c) === uid);
+  const canDel = (c: CommentItem) =>
+    role === "admin" || (role === "user" && !!uid && userIdOf(c) === uid);
 
   const syncTextFromEditor = () => {
     const editor = editorRef.current;
@@ -296,7 +354,9 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
       return;
     }
 
-    const query = (command: "bold" | "italic" | "underline" | "strikeThrough") => {
+    const query = (
+      command: "bold" | "italic" | "underline" | "strikeThrough",
+    ) => {
       try {
         return document.queryCommandState(command);
       } catch {
@@ -333,10 +393,14 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
   const submit = async () => {
     const latestText = syncTextFromEditor();
     if (!token) return;
-    if (!latestText.trim()) return showNotice({ type: "error", message: "Please write a comment." });
+    if (!latestText.trim())
+      return showNotice({ type: "error", message: "Please write a comment." });
     setSubmitting(true);
     try {
-      const r = await createComment(hotelId, token, { comment: latestText.trim(), rating });
+      const r = await createComment(hotelId, token, {
+        comment: latestText.trim(),
+        rating,
+      });
       if (r?.data) {
         const updated = [r.data, ...comments];
         setComments(updated);
@@ -344,11 +408,18 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
       }
       if (editorRef.current) editorRef.current.innerHTML = "";
       setActiveFormats(emptyFormatState());
-      setText(""); setRating(5); setShowForm(false);
+      setText("");
+      setRating(5);
+      setShowForm(false);
       showNotice({ type: "success", message: "Review submitted." });
     } catch (e) {
-      showNotice({ type: "error", message: e instanceof Error ? e.message : "Failed to submit." });
-    } finally { setSubmitting(false); }
+      showNotice({
+        type: "error",
+        message: e instanceof Error ? e.message : "Failed to submit.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const del = async (id: string) => {
@@ -359,11 +430,15 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
       setComments(rest);
       setAvg(recalcAvg(rest));
     } catch (e) {
-      showNotice({ type: "error", message: e instanceof Error ? e.message : "Failed to delete." });
+      showNotice({
+        type: "error",
+        message: e instanceof Error ? e.message : "Failed to delete.",
+      });
     }
   };
 
-  const filtered = tab === "yours" ? comments.filter((c) => userIdOf(c) === uid) : comments;
+  const filtered =
+    tab === "yours" ? comments.filter((c) => userIdOf(c) === uid) : comments;
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const start = (page - 1) * PAGE_SIZE;
   const visible = filtered.slice(start, start + PAGE_SIZE);
@@ -373,16 +448,38 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
       <section className="mt-8 border border-[rgba(171,25,46,0.08)] bg-[rgba(255,245,244,0.45)] p-5 sm:p-10">
         <div className="flex items-center justify-between gap-4">
           <h2 className="font-figma-copy text-[2rem] text-[var(--figma-ink)] sm:text-[2.5rem]">
-            Reviews ({comments.length}){avg !== null && <span className="ml-2 text-[var(--figma-red)]">{avg.toFixed(1)}★</span>}
+            Reviews ({comments.length})
+            {avg !== null && (
+              <span className="pl-2 ml-2 text-[var(--figma-red)]">
+                {avg.toFixed(1)}★
+              </span>
+            )}
           </h2>
           {token && (
             <button
               type="button"
               onClick={toggleForm}
-              className="flex h-12 w-12 shrink-0 items-center justify-center border border-[var(--figma-bg)] bg-[var(--figma-red-strong)] text-white font-figma-copy text-[2rem] leading-none sm:h-14 sm:w-14"
+              className="
+    flex h-8 w-8 sm:h-10 sm:w-10 
+    items-center justify-center 
+    bg-[var(--figma-red-strong)] 
+    text-white 
+    transition-all duration-200
+    hover:brightness-90 
+    active:scale-95
+    focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--figma-red-strong)]
+  "
               aria-label={showForm ? "Close" : "Write a review"}
             >
-              {showForm ? "×" : "+"}
+              <span
+                className="
+    text-[2.4rem] sm:text-[2.8rem] 
+    font-light 
+    leading-[0] -translate-y-[6px]
+  "
+              >
+                {showForm ? "×" : "+"}
+              </span>
             </button>
           )}
         </div>
@@ -390,10 +487,20 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
         {showForm && token && (
           <div className="mt-5 space-y-4 border-t border-[rgba(171,25,46,0.12)] pt-5">
             <div className="flex items-center gap-3">
-              <span className="font-figma-copy text-[1.1rem] text-[var(--figma-red)]">Rating</span>
+              <span className="font-figma-copy text-[1.1rem] text-[var(--figma-red)]">
+                Rating
+              </span>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((v) => (
-                  <button key={v} type="button" onClick={() => setRating(v)} className={`text-[1.6rem] leading-none ${v <= rating ? "text-[var(--figma-red)]" : "text-[rgba(171,25,46,0.2)]"}`} aria-label={`Rate ${v}`}>★</button>
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setRating(v)}
+                    className={`text-[1.6rem] leading-none ${v <= rating ? "text-[var(--figma-red)]" : "text-[rgba(171,25,46,0.2)]"}`}
+                    aria-label={`Rate ${v}`}
+                  >
+                    ★
+                  </button>
                 ))}
               </div>
             </div>
@@ -442,7 +549,12 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
               </div>
             </div>
             <DismissibleNotice notice={notice} onClose={dismissNotice} />
-            <button type="button" onClick={() => void submit()} disabled={submitting} className="figma-button w-full py-3 font-figma-copy text-[1.3rem] normal-case tracking-normal">
+            <button
+              type="button"
+              onClick={() => void submit()}
+              disabled={submitting}
+              className="figma-button w-full py-3 font-figma-copy text-[1.3rem] normal-case tracking-normal"
+            >
               {submitting ? "Submitting..." : "Submit Review"}
             </button>
           </div>
@@ -450,27 +562,77 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
 
         {!loading && comments.length > 0 && (
           <div className="mt-5 flex gap-2">
-            <button type="button" onClick={() => { setTab("all"); setPage(1); }} className={`px-4 py-1.5 font-figma-copy text-[1.05rem] ${tab === "all" ? "bg-[var(--figma-red)] text-white" : "border border-[rgba(171,25,46,0.2)] text-[var(--figma-ink)]"}`}>All reviews</button>
+            <button
+              type="button"
+              onClick={() => {
+                setTab("all");
+                setPage(1);
+              }}
+              className={`px-4 py-1.5 font-figma-copy text-[1.05rem] ${tab === "all" ? "bg-[var(--figma-red)] text-white" : "border border-[rgba(171,25,46,0.2)] text-[var(--figma-ink)]"}`}
+            >
+              All reviews
+            </button>
             {token && (
-              <button type="button" onClick={() => { setTab("yours"); setPage(1); }} className={`px-4 py-1.5 font-figma-copy text-[1.05rem] ${tab === "yours" ? "bg-[var(--figma-red)] text-white" : "border border-[rgba(171,25,46,0.2)] text-[var(--figma-ink)]"}`}>Your reviews</button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTab("yours");
+                  setPage(1);
+                }}
+                className={`px-4 py-1.5 font-figma-copy text-[1.05rem] ${tab === "yours" ? "bg-[var(--figma-red)] text-white" : "border border-[rgba(171,25,46,0.2)] text-[var(--figma-ink)]"}`}
+              >
+                Your reviews
+              </button>
             )}
           </div>
         )}
 
         {loading ? (
-          <p className="mt-5 font-figma-copy text-[1.3rem] text-[var(--figma-ink-soft)]">Loading…</p>
+          <p className="mt-5 font-figma-copy text-[1.3rem] text-[var(--figma-ink-soft)]">
+            Loading…
+          </p>
         ) : filtered.length === 0 ? (
-          <p className="mt-5 font-figma-copy text-[1.3rem] text-[var(--figma-ink-soft)]">{tab === "yours" ? "You haven't reviewed this hotel yet." : "No ratings yet"}</p>
+          <p className="mt-5 font-figma-copy text-[1.3rem] text-[var(--figma-ink-soft)]">
+            {tab === "yours"
+              ? "You haven't reviewed this hotel yet."
+              : "No ratings yet"}
+          </p>
         ) : (
           <>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              {visible.map((c) => <ReviewCard key={c._id} c={c} canDel={canDel(c)} onDelete={(id) => void del(id)} />)}
+              {visible.map((c) => (
+                <ReviewCard
+                  key={c._id}
+                  c={c}
+                  canDel={canDel(c)}
+                  onDelete={(id) => void del(id)}
+                />
+              ))}
             </div>
             {totalPages > 1 && (
               <div className="mt-6 flex items-center gap-3">
-                <button type="button" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="text-[var(--figma-red)] disabled:opacity-30" aria-label="Previous">‹</button>
-                <span className="font-figma-copy text-[1rem] text-[var(--figma-ink)]">{start + 1}–{Math.min(start + PAGE_SIZE, filtered.length)} of {filtered.length}</span>
-                <button type="button" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="text-[var(--figma-red)] disabled:opacity-30" aria-label="Next">›</button>
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="text-[var(--figma-red)] disabled:opacity-30"
+                  aria-label="Previous"
+                >
+                  ‹
+                </button>
+                <span className="font-figma-copy text-[1rem] text-[var(--figma-ink)]">
+                  {start + 1}–{Math.min(start + PAGE_SIZE, filtered.length)} of{" "}
+                  {filtered.length}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="text-[var(--figma-red)] disabled:opacity-30"
+                  aria-label="Next"
+                >
+                  ›
+                </button>
               </div>
             )}
           </>
