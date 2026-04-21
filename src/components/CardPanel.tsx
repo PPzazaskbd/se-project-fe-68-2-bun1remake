@@ -40,13 +40,13 @@ function isEditableTarget(target: EventTarget | null) {
 
 export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
   const { data: session } = useSession();
-  const isAdmin = session?.user?.role === "admin"; 
+  const isAdmin = session?.user?.role === "admin";
   const hotels = hotelsJson.data ?? [];
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
   const today = getTodayIsoDate();
-  
+
   const urlDateRange = getDateRangeFromSearchParams(
     searchParams,
     today,
@@ -95,7 +95,8 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
     return hotels.filter((hotel) => {
       // 1. Text Search
       const normalizedTerm = searchTerm.trim().toLowerCase();
-      const matchesSearch = !normalizedTerm || 
+      const matchesSearch =
+        !normalizedTerm ||
         [hotel.name, hotel.address, hotel.province, hotel.region]
           .filter(Boolean)
           .some((v) => v.toLowerCase().includes(normalizedTerm));
@@ -107,12 +108,14 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
         const hRating = (hotel as any).rating || (hotel as any).review;
         if (String(hRating) !== selectedFilters.rating) return false;
       }
-      
+
       if (selectedFilters.priceRange) {
         const p = hotel.price;
         if (selectedFilters.priceRange === "$" && p > 1000) return false;
-        if (selectedFilters.priceRange === "$$" && (p <= 1000 || p > 3000)) return false;
-        if (selectedFilters.priceRange === "$$$" && (p <= 3000 || p > 6000)) return false;
+        if (selectedFilters.priceRange === "$$" && (p <= 1000 || p > 3000))
+          return false;
+        if (selectedFilters.priceRange === "$$$" && (p <= 3000 || p > 6000))
+          return false;
         if (selectedFilters.priceRange === "$$$+" && p <= 6000) return false;
       }
 
@@ -120,32 +123,48 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
       const specs = hotel.specializations;
 
       if (selectedFilters.facility.length > 0) {
-        const hFac = (specs?.facility || []).map(f => f.toLowerCase());
-        if (!selectedFilters.facility.every(f => hFac.includes(f.toLowerCase()))) return false;
+        const hFac = (specs?.facility || []).map((f) => f.toLowerCase());
+        if (
+          !selectedFilters.facility.every((f) => hFac.includes(f.toLowerCase()))
+        )
+          return false;
       }
 
       if (selectedFilters.location.length > 0) {
-        const hLoc = (specs?.location || []).map(l => l.toLowerCase());
-        if (!selectedFilters.location.some(l => hLoc.includes(l.toLowerCase()))) return false;
+        const hLoc = (specs?.location || []).map((l) => l.toLowerCase());
+        if (
+          !selectedFilters.location.some((l) => hLoc.includes(l.toLowerCase()))
+        )
+          return false;
       }
 
       if (selectedFilters.accessibility.length > 0) {
-        const hAcc = (specs?.accessibility || []).map(a => a.toLowerCase());
-        if (!selectedFilters.accessibility.every(a => hAcc.includes(a.toLowerCase()))) return false;
+        const hAcc = (specs?.accessibility || []).map((a) => a.toLowerCase());
+        if (
+          !selectedFilters.accessibility.every((a) =>
+            hAcc.includes(a.toLowerCase()),
+          )
+        )
+          return false;
       }
 
       return true;
     });
   }, [hotels, searchTerm, selectedFilters]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredHotels.length / ITEMS_PER_PAGE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredHotels.length / ITEMS_PER_PAGE),
+  );
 
   const visibleHotels = useMemo(() => {
     const start = (page - 1) * ITEMS_PER_PAGE;
     return filteredHotels.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredHotels, page]);
 
-  useEffect(() => { setPage(1); }, [searchTerm, selectedFilters]);
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, selectedFilters]);
 
   // Sync state with URL params
   useEffect(() => {
@@ -155,7 +174,12 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
     setGuestsChild(urlDateRange.guestsChild);
   }, [urlDateRange]);
 
-  const syncToolbarState = (inDate: string, outDate: string, adults: number, kids: number) => {
+  const syncToolbarState = (
+    inDate: string,
+    outDate: string,
+    adults: number,
+    kids: number,
+  ) => {
     const normalized = normalizeDateRange(inDate, outDate, today, adults, kids);
     setFromDate(normalized.checkIn);
     setToDate(normalized.checkOut);
@@ -177,12 +201,22 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
     <section className="figma-page py-6 sm:py-8">
       <div className="figma-shell">
         <DateRangeToolbar
-          fromDate={fromDate} toDate={toDate}
-          guestsAdult={guestsAdult} guestsChild={guestsChild}
-          onFromDateChange={(v) => syncToolbarState(v, toDate, guestsAdult, guestsChild)}
-          onToDateChange={(v) => syncToolbarState(fromDate, v, guestsAdult, guestsChild)}
-          onGuestsAdultChange={(v) => syncToolbarState(fromDate, toDate, v, guestsChild)}
-          onGuestsChildChange={(v) => syncToolbarState(fromDate, toDate, guestsAdult, v)}
+          fromDate={fromDate}
+          toDate={toDate}
+          guestsAdult={guestsAdult}
+          guestsChild={guestsChild}
+          onFromDateChange={(v) =>
+            syncToolbarState(v, toDate, guestsAdult, guestsChild)
+          }
+          onToDateChange={(v) =>
+            syncToolbarState(fromDate, v, guestsAdult, guestsChild)
+          }
+          onGuestsAdultChange={(v) =>
+            syncToolbarState(fromDate, toDate, v, guestsChild)
+          }
+          onGuestsChildChange={(v) =>
+            syncToolbarState(fromDate, toDate, guestsAdult, v)
+          }
         />
 
         <div className="mt-6">
@@ -192,44 +226,63 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
                 FIND A HOTEL
               </label>
               <p className="font-figma-copy text-[1.15rem] text-[var(--figma-ink-soft)]">
-                {filteredHotels.length} hotel{filteredHotels.length === 1 ? "" : "s"} available
+                {filteredHotels.length} hotel
+                {filteredHotels.length === 1 ? "" : "s"} available
               </p>
             </div>
 
             <div className="flex items-center gap-3">
-              <button 
+              <button
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
                 style={{ fontFamily: "'Cormorant Infant', serif" }}
                 className={`
                   flex items-center justify-center gap-2
-                  w-[120px] h-[60px] 
+                  w-[120px] h-[48px] 
                   transition-all duration-300
-                  drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)]
+  hover:not-disabled:border-[rgba(153,17,31,0.58)] 
+  hover:not-disabled:shadow-[0_16px_32px_rgba(171,25,46,0.18)] 
+  hover:not-disabled:-translate-y-[1px]
                   border-[1px] border-[#AB192E]
                   ${isFilterOpen ? "bg-[#AB192E] text-[#FDF1E8]" : "bg-[#FDF1E8] text-[#AB192E]"}
                 `}
               >
-                <svg width="32" height="32" viewBox="20 16 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M46 18H22L31.6 30.6133V39.3333L36.4 42V30.6133L46 18Z" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="20 16 28 28"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M46 18H22L31.6 30.6133V39.3333L36.4 42V30.6133L46 18Z"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
-                <span className="text-[24px] leading-[29px] font-[400]">Filter</span>
+                <span className="text-[24px] leading-[29px] font-[400]">
+                  Filter
+                </span>
               </button>
-              
+
               {isAdmin && (
                 <Link href="/hotel/create">
                   <button className="flex items-center gap-2 bg-red-700 px-6 py-2 text-white shadow hover:bg-red-800 transition-colors cursor-pointer">
                     <img src="/addhotel.svg" alt="Add" className="w-5 h-5" />
-                    <span className="font-figma-copy text-[1.15rem] tracking-wide">Add</span>
+                    <span className="font-figma-copy text-[1.15rem] tracking-wide">
+                      Add
+                    </span>
                   </button>
                 </Link>
               )}
             </div>
           </div>
-          
-          <FilterPanel 
-            isOpen={isFilterOpen} 
-            selectedFilters={selectedFilters} 
-            onToggle={toggleFilter} 
+
+          <FilterPanel
+            isOpen={isFilterOpen}
+            selectedFilters={selectedFilters}
+            onToggle={toggleFilter}
           />
 
           <input
@@ -249,8 +302,10 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
                 id={hotel.id || hotel._id}
                 isAdmin={isAdmin}
                 href={buildDateRangeHref(`/hotel/${hotel.id || hotel._id}`, {
-                  checkIn: fromDate, checkOut: toDate,
-                  guestsAdult, guestsChild,
+                  checkIn: fromDate,
+                  checkOut: toDate,
+                  guestsAdult,
+                  guestsChild,
                 })}
                 name={hotel.name}
                 district={hotel.address}
