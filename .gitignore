@@ -11,3 +11,4 @@ present.md
 .DS_store
 file_dump/
 .vscode/
+.claude/
