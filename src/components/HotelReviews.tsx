@@ -236,19 +236,16 @@ function ReviewCard({ c, canDel, onDelete, isDeleting }: {
         {canDel && (
           confirming ? (
             // Confirmation state
-            <button ref={confirmRef} type="button" disabled={isDeleting} onClick={() => onDelete(c._id)}
-              className="flex items-center gap-1.5 bg-[var(--figma-red)] px-3 py-1 text-white font-figma-copy text-[0.85rem] shrink-0 disabled:opacity-50">
+            <button ref={confirmRef} type="button" disabled={isDeleting} onClick={() => onDelete(c._id)}>
               {isDeleting ? (
-                <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="32" strokeDashoffset="12"/>
+                <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="32" strokeDashoffset="12" color="Red"/>
                 </svg>
               ) : (
-                <>
+                <div className="flex items-center gap-1.5 bg-[var(--figma-red)] text-white font-figma-copy text-[0.85rem] shrink-0 disabled:opacity-50 border border-left-[var(--figma-red)] pl-2">
                   Confirm to DELETE
-                  <svg width="12" height="14" viewBox="0 0 14 16" fill="none">
-                    <path d="M1 4h12M5 4V2h4v2M2 4l1 10h8l1-10H2z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </>
+                  <img src="/delete.svg" width={21.33} height={24} alt="" />
+                </div>
               )}
             </button>
           ) : (
@@ -256,9 +253,7 @@ function ReviewCard({ c, canDel, onDelete, isDeleting }: {
             <button type="button"onClick={() => setConfirming(true)}
               className="shrink-0 text-[var(--figma-red)] opacity-60 hover:opacity-100"
               aria-label="Delete review">
-              <svg width="14" height="16" viewBox="0 0 14 16" fill="none">
-                <path d="M1 4h12M5 4V2h4v2M2 4l1 10h8l1-10H2z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <img src="/deleteRed.svg" width={21.33} height={24} alt="" />
             </button>
           )
         )}
