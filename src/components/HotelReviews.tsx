@@ -207,9 +207,24 @@ function renderReviewText(input: string) {
   );
 }
 
-function ReviewCard({ c, canDel, onDelete }: {
-  c: CommentItem; canDel: boolean; onDelete: (id: string) => void;
+function ReviewCard({ c, canDel, onDelete, isDeleting }: {
+  c: CommentItem; canDel: boolean; onDelete: (id: string) => void, isDeleting?: boolean;
 }) {
+  const [confirming, setConfirming] = useState(false);
+  const confirmRef = useRef<HTMLButtonElement>(null);
+
+  // Handle click outside of the delete confirmation button to cancel deletion
+  useEffect(() => {
+    if (!confirming) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (confirmRef.current && !confirmRef.current.contains(e.target as Node)) {
+        setConfirming(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [confirming]);
+
   return (
     <article className="flex flex-col border border-[rgba(171,25,46,0.08)] bg-white p-4">
       <div className="flex items-start justify-between gap-2">
@@ -217,11 +232,37 @@ function ReviewCard({ c, canDel, onDelete }: {
           <span className="font-figma-copy text-[1.05rem] text-[var(--figma-red)]">{stars(c.rating)}</span>
           <span className="font-figma-copy text-[1rem] text-[var(--figma-ink)]">{nameOf(c)}</span>
         </div>
+
         {canDel && (
-          <button type="button" onClick={() => onDelete(c._id)} className="shrink-0 text-[var(--figma-red)] opacity-60 hover:opacity-100" aria-label="Delete review">
-            <svg width="14" height="16" viewBox="0 0 14 16" fill="none"><path d="M1 4h12M5 4V2h4v2M2 4l1 10h8l1-10H2z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </button>
+          confirming ? (
+            // Confirmation state
+            <button ref={confirmRef} type="button" disabled={isDeleting} onClick={() => onDelete(c._id)}
+              className="flex items-center gap-1.5 bg-[var(--figma-red)] px-3 py-1 text-white font-figma-copy text-[0.85rem] shrink-0 disabled:opacity-50">
+              {isDeleting ? (
+                <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="32" strokeDashoffset="12"/>
+                </svg>
+              ) : (
+                <>
+                  Confirm to DELETE
+                  <svg width="12" height="14" viewBox="0 0 14 16" fill="none">
+                    <path d="M1 4h12M5 4V2h4v2M2 4l1 10h8l1-10H2z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </>
+              )}
+            </button>
+          ) : (
+            // Default state
+            <button type="button"onClick={() => setConfirming(true)}
+              className="shrink-0 text-[var(--figma-red)] opacity-60 hover:opacity-100"
+              aria-label="Delete review">
+              <svg width="14" height="16" viewBox="0 0 14 16" fill="none">
+                <path d="M1 4h12M5 4V2h4v2M2 4l1 10h8l1-10H2z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          )
         )}
+
       </div>
       <div className="mt-2 line-clamp-3 wrap-break-word font-figma-copy text-[1rem] leading-snug text-[var(--figma-ink)]">
         {renderReviewText(textOf(c))}
@@ -249,6 +290,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
   const [activeFormats, setActiveFormats] = useState<FormatState>(emptyFormatState());
   const editorRef = useRef<HTMLDivElement | null>(null);
   const { notice, showNotice, dismissNotice } = useDismissibleNotice();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const recalcAvg = (list: CommentItem[]) =>
     list.length === 0 ? null : parseFloat((list.reduce((s, c) => s + (Number(c.rating) || 0), 0) / list.length).toFixed(2));
@@ -353,6 +395,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
 
   const del = async (id: string) => {
     if (!token) return;
+    setDeletingId(id);
     try {
       await deleteComment(id, token);
       const rest = comments.filter((c) => c._id !== id);
@@ -360,6 +403,8 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
       setAvg(recalcAvg(rest));
     } catch (e) {
       showNotice({ type: "error", message: e instanceof Error ? e.message : "Failed to delete." });
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -464,7 +509,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
         ) : (
           <>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              {visible.map((c) => <ReviewCard key={c._id} c={c} canDel={canDel(c)} onDelete={(id) => void del(id)} />)}
+              {visible.map((c) => <ReviewCard key={c._id} c={c} canDel={canDel(c)} onDelete={(id) => void del(id)} isDeleting={deletingId === c._id}/>)}
             </div>
             {totalPages > 1 && (
               <div className="mt-6 flex items-center gap-3">
