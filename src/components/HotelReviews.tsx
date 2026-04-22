@@ -245,7 +245,9 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
   const [showForm, setShowForm] = useState(false);
   const [rating, setRating] = useState(5);
   const [text, setText] = useState("");
-  const [guestName, setGuestName] = useState("");
+  const [guestName] = useState(() =>
+    "Guest-" + Math.random().toString(36).slice(2, 8).toUpperCase()
+  );
   const [submitting, setSubmitting] = useState(false);
   const [activeFormats, setActiveFormats] = useState<FormatState>(emptyFormatState());
   const editorRef = useRef<HTMLDivElement | null>(null);
@@ -332,7 +334,6 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
     if (showForm && editorRef.current) {
       editorRef.current.innerHTML = "";
       setText("");
-      setGuestName("");
       setActiveFormats(emptyFormatState());
     }
     setShowForm((v) => !v);
@@ -347,20 +348,23 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
         comment: latestText.trim(),
         rating,
       };
-      // For guests, attach the name they typed (fall back to "Guest")
-      if (!token) payload.guestName = guestName.trim() || "Guest";
+      // Guests get an auto-generated name like "Guest-AB12CD"
+      if (!token) payload.guestName = guestName;
 
       const r = await createComment(hotelId, token || null, payload);
       if (r?.data) {
-        // Enrich the returned comment with the display name immediately so the
-        // card shows the correct name without requiring a full page refresh.
-        const displayName = token
+        // Only inject user info when the backend actually saved it as a user
+        // comment (r.data.user is set). If it came back as guest (no user),
+        // keep it as guest so canDel stays false and the trash icon won't show
+        // with a token that protect would later reject.
+        const savedAsUser = !!r.data.user;
+        const displayName = savedAsUser
           ? (session?.user?.name || "You")
           : (guestName.trim() || "Guest");
         const enriched = {
           ...r.data,
-          user: token ? { _id: uid, name: displayName } : null,
-          guestName: token ? undefined : displayName,
+          user: savedAsUser ? { _id: uid, name: displayName } : null,
+          guestName: savedAsUser ? undefined : displayName,
         };
         const updated = [enriched, ...comments];
         setComments(updated);
@@ -368,10 +372,16 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
       }
       if (editorRef.current) editorRef.current.innerHTML = "";
       setActiveFormats(emptyFormatState());
-      setText(""); setGuestName(""); setRating(5); setShowForm(false);
+      setText(""); setRating(5); setShowForm(false);
       showNotice({ type: "success", message: "Review submitted." });
     } catch (e) {
-      showNotice({ type: "error", message: e instanceof Error ? e.message : "Failed to submit." });
+      const msg = e instanceof Error ? e.message : "Failed to submit.";
+      // If the backend rejected a guest post (e.g. not yet updated on the server),
+      // give a friendlier message instead of raw "Not authorized".
+      const friendly = !token && /not authorized|unauthorized/i.test(msg)
+        ? "Guest comments aren't available right now. Please log in to leave a review."
+        : msg;
+      showNotice({ type: "error", message: friendly });
     } finally { setSubmitting(false); }
   };
 
@@ -411,22 +421,6 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
 
         {showForm && (
           <div className="mt-5 space-y-4 border-t border-[rgba(171,25,46,0.12)] pt-5">
-            {/* Guest name input — only shown to visitors without a session */}
-            {!token && (
-              <div className="flex flex-col gap-1">
-                <label className="font-figma-copy text-[1rem] text-[var(--figma-ink-soft)]">
-                  Your name <span className="text-[0.85rem]">(optional)</span>
-                </label>
-                <input
-                  type="text"
-                  value={guestName}
-                  onChange={(e) => setGuestName(e.target.value)}
-                  placeholder="Guest"
-                  maxLength={50}
-                  className="border border-[rgba(171,25,46,0.18)] bg-[rgba(255,245,244,0.6)] px-3 py-2 font-figma-copy text-[1rem] text-[var(--figma-ink)] placeholder:text-[rgba(250,170,170,0.95)] focus:outline-none"
-                />
-              </div>
-            )}
             <div className="flex items-center gap-3">
               <span className="font-figma-copy text-[1.1rem] text-[var(--figma-red)]">Rating</span>
               <div className="flex gap-1">
