@@ -447,7 +447,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
 
   return (
     <>
-      <section className="border border-[rgba(171,25,46,0.08)] bg-[rgba(255,245,244,0.45)] p-5 sm:p-10">
+      <section className="mt-8 border border-[rgba(171,25,46,0.08)] bg-[rgba(255,245,244,0.45)] p-5 sm:p-10">
         <div className="flex items-center justify-between gap-4">
           <h2 className="font-figma-copy text-[2rem] text-[var(--figma-ink)] sm:text-[2.5rem]">
             Reviews ({comments.length}){avg !== null && <span className="ml-2 text-[var(--figma-red)]">{avg.toFixed(1)}★</span>}
@@ -538,8 +538,10 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
           <p className="mt-5 font-figma-copy text-[1.3rem] text-[var(--figma-ink-soft)]">{tab === "yours" ? "You haven't reviewed this hotel yet." : "No ratings yet"}</p>
         ) : (
           <>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              {visible.map((c) => <ReviewCard key={c._id} c={c} canDel={canDel(c)} onDelete={(id) => void del(id)} />)}
+            <div className="mt-5 max-h-[60vh] overflow-y-auto pr-1">
+              <div className="grid gap-4 sm:grid-cols-2">
+                {visible.map((c) => <ReviewCard key={c._id} c={c} canDel={canDel(c)} onDelete={(id) => void del(id)} />)}
+              </div>
             </div>
             {totalPages > 1 && (
               <div className="mt-6 flex items-center gap-3">

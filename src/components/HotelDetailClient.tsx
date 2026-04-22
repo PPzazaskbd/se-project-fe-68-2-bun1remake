@@ -230,7 +230,7 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
         />
 
         <section className="mt-8 border border-[rgba(171,25,46,0.08)] bg-[rgba(255,245,244,0.45)] p-5 sm:p-10">
-          <div className="grid gap-8 xl:grid-cols-[1.4fr_0.86fr] xl:items-start">
+          <div className="grid gap-8 xl:grid-cols-[1.4fr_0.86fr]">
             <div>
               <div className="aspect-[896/400] overflow-hidden bg-[#efe3d8]">
                 {hotel.imgSrc ? (
@@ -274,7 +274,7 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
               ) : null}
             </div>
 
-            <div className="flex flex-col gap-6 xl:sticky xl:top-8 xl:max-h-[calc(100vh-5rem)] xl:overflow-y-auto">
+            <div className="flex flex-col justify-between gap-8">
               <div className="space-y-5 font-figma-copy text-[1.4rem] text-[var(--figma-ink)] sm:text-[1.7rem]">
                 <div className="flex items-center justify-between gap-6">
                   <span>Price :</span>
@@ -375,9 +375,11 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
                 <DismissibleNotice notice={notice} onClose={dismissNotice} />
               </div>
             </div>
-            <HotelReviews hotelId={hotelId} />
           </div>
         </section>
+      </div>
+      <div className="figma-shell">
+        <HotelReviews hotelId={hotelId} />
       </div>
     </main>
   );
