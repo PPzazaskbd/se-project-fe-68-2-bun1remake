@@ -21,6 +21,7 @@ export async function DELETE(
       },
     );
     const payload = await response.json().catch(() => null);
+    
     if (payload === null) {
       return new NextResponse(null, { status: response.status });
     }
@@ -29,3 +30,4 @@ export async function DELETE(
     return NextResponse.json({ message: "Comments service unavailable." }, { status: 502 });
   }
 }
+
