@@ -14,28 +14,29 @@ export default function RandomHotelButton() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
 
+  // State to track the cumulative rotation
+  const [rotation, setRotation] = useState(0);
+
   const handleRandomize = async () => {
+    if (loading) return; // Prevent double clicks
     setLoading(true);
     try {
-      // 1. Fetch data on demand via the Server Action
       const hotelsJson = await fetchHotelsAction();
       const hotels = hotelsJson.data || [];
-
       if (hotels.length === 0) return;
 
-      // 2. Pick random
       const randomHotel = hotels[Math.floor(Math.random() * hotels.length)];
       const id = randomHotel.id || randomHotel._id;
 
-      // 3. Pull dates/guests from the current page URL
       const currentUrlParams = getDateRangeFromSearchParams(searchParams);
-
-      // 4. Navigate
       const href = buildDateRangeHref(`/hotel/${id}`, currentUrlParams);
+
       router.push(href);
     } catch (error) {
       console.error("Randomizer failed:", error);
     } finally {
+      // Note: We don't necessarily set loading to false here
+      // if we want it to stay spinning until the next page loads
       setLoading(false);
     }
   };
@@ -43,29 +44,47 @@ export default function RandomHotelButton() {
   return (
     <Button
       variant="contained"
-      className="!px-1 figma-button font-figma-display"
+      className="!px-1 figma-button self-start group"
       onClick={handleRandomize}
+      // When hovering, we trigger a "tick" of 90 degrees
+      onMouseEnter={() => setRotation((prev) => prev + 90)}
       sx={{
-        minWidth: "",
+        width: "40px",
+        height: "40px",
+        minWidth: "40px",
         borderRadius: "6px !important",
         padding: "0 !important",
-        "& .MuiButton-startIcon": {
-          margin: 0,
-        },
         backgroundColor: "var(--figma-red)",
         "&:hover": {
           backgroundColor: "var(--figma-red)",
           filter: "brightness(0.9)",
         },
-        py: "4px !important",
+        "&.Mui-disabled": { backgroundColor: "var(--figma-red)", opacity: 0.7 },
       }}
       disableElevation
     >
-      <img
-        src="/dice.svg"
-        alt=""
-        style={{ width: 30, height: 30, filter: "invert(1)" }}
-      />
+      {loading ? (
+        <CircularProgress size={20} sx={{ color: "var(--figma-white)" }} />
+      ) : (
+        <div
+          className="flex items-center justify-center transition-transform duration-500 ease-in-out"
+          style={{ transform: `rotate(${rotation}deg)` }}
+          // To make it continue/pause, we can add a listener to keep it turning while hovered
+          onTransitionEnd={() => {
+            // If the mouse is still over the button, rotate another 90 degrees after a tiny "rest"
+            const isHovered = document.querySelector(".group:hover");
+            if (isHovered) {
+              setTimeout(() => setRotation((prev) => prev + 90), 100);
+            }
+          }}
+        >
+          <img
+            src="/dice.svg"
+            alt="Randomize"
+            style={{ width: 30, height: 30, filter: "invert(1)" }}
+          />
+        </div>
+      )}
     </Button>
   );
 }
