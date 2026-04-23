@@ -6,6 +6,7 @@ export async function DELETE(
   context: { params: Promise<{ commentId: string }> },
 ) {
   const authorization = request.headers.get("authorization");
+
   if (!authorization) {
     return NextResponse.json({ message: "Unauthorized." }, { status: 401 });
   }
@@ -20,8 +21,13 @@ export async function DELETE(
       },
     );
     const payload = await response.json().catch(() => null);
-    return NextResponse.json(payload ?? { success: true }, { status: response.status });
+    
+    if (payload === null) {
+      return new NextResponse(null, { status: response.status });
+    }
+    return NextResponse.json(payload, { status: response.status });
   } catch {
     return NextResponse.json({ message: "Comments service unavailable." }, { status: 502 });
   }
 }
+

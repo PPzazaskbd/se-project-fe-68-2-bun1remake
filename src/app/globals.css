@@ -72,6 +72,7 @@ button:active {
 
 .font-figma-display {
   font-family: "Cormorant Garamond", serif;
+  font-weight: 300;
 }
 
 .page-fade {

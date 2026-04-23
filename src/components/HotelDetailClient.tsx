@@ -256,7 +256,9 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
               </p>
 
               <p className="mt-5 flex items-start gap-3 font-figma-copy text-[1.2rem] text-[var(--figma-ink)] sm:text-[1.45rem]">
-                <span className="pt-1 text-[var(--figma-red)]">+</span>
+                <span className="pt-1 text-[var(--figma-red)]">
+                  <img src="/address.svg" alt="+"/>
+                </span>
                 <span>{hotel.address}</span>
               </p>
 

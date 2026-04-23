@@ -56,14 +56,15 @@ export interface HotelItem {
 export interface CommentItem {
   _id: string;
   createdAt: string;
-  commentDate?: string; 
-  user: string | { _id?: string; name?: string };
-  userId?: string | { _id?: string; name?: string }; 
+  commentDate?: string;
+  user: string | { _id?: string; name?: string } | null;
+  userId?: string | { _id?: string; name?: string };
   hotel: string;
-  hotelId?: string; 
+  hotelId?: string;
   text: string;
   comment?: string;
   rating: number;
+  guestName?: string;   // set when posted by a non-logged-in guest
 }
 
 interface BackendReferenceItem {
