@@ -26,7 +26,7 @@ export default async function PrivacyPolicy() {
       {/* 3. Render the Markdown */}
       <PolicySidebar headings={headings}>
         <div className="max-w-none">
-          <div id="policy-start" className="pt-10" />
+          <div id="policy-start" className="pt-25 lg:pt-10" />
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
