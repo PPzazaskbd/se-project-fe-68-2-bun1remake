@@ -3,6 +3,7 @@ import { CommentItem } from "@/interface";
 interface CommentPayload {
   comment: string;
   rating: number;
+  guestName?: string;   // only used when posting without a session
 }
 
 interface CommentsResponse {
@@ -39,14 +40,18 @@ export async function getComments(hotelId: string): Promise<CommentsResponse> {
   return payload as CommentsResponse;
 }
 
-export async function createComment(hotelId: string, token: string, body: CommentPayload) {
+export async function createComment(hotelId: string, token: string | null, body: CommentPayload) {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
   const response = await fetch(`/api/comments/${encodeURIComponent(hotelId)}`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ text: body.comment, rating: body.rating }),
+    headers,
+    body: JSON.stringify({
+      text: body.comment,
+      rating: body.rating,
+      ...(body.guestName ? { guestName: body.guestName } : {}),
+    }),
   });
   const payload = await parseJson(response);
 

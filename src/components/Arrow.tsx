@@ -1,17 +1,41 @@
-"use client"
+"use client";
+
 export default function Arrow({
   direction,
   disabled,
 }: {
-  direction: "left" | "right";
+  direction: "left" | "right" | "top" | "bottom";
   disabled?: boolean;
 }) {
-  const rotation = direction === "right" ? "rotate(180deg)" : "none";
+  const rotations = {
+    left: "rotate(0deg)",
+    right: "rotate(180deg)",
+    top: "rotate(90deg)",
+    bottom: "rotate(270deg)",
+  };
 
   return (
-    <svg width="48" height="56" viewBox="0 0 48 56" fill="none" xmlns="http://www.w3.org/2000/svg" style={{transform:rotation}}>
-<path d="M0 27.7129L48 7.62939e-05V55.4257L0 27.7129Z" fill="#B71422" fillOpacity="0.5"/>
-</svg>
-
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{
+        transform: rotations[direction],
+        transition: "transform 0.3s ease-out",
+        opacity: disabled ? 0.4 : 1,
+        cursor: disabled ? "not-allowed" : "pointer",
+      }}
+      className="inline-block"
+    >
+      <path
+        d="M15 18L9 12L15 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

@@ -3,6 +3,7 @@
 
 :root {
   --figma-bg: #fbefdf;
+  --figma-topbar: #fde3db;
   --figma-soft: rgba(254, 186, 207, 0.12);
   --figma-border: rgba(171, 25, 46, 0.18);
   --figma-red: #ab192e;
@@ -23,6 +24,11 @@ body {
 body {
   color: var(--figma-ink);
   font-family: "Cormorant Infant", serif;
+}
+
+.figma-menu-open {
+  overflow: hidden;
+  background-color: var(--figma-bg);
 }
 
 * {
@@ -72,6 +78,7 @@ button:active {
 
 .font-figma-display {
   font-family: "Cormorant Garamond", serif;
+  font-weight: 300;
 }
 
 .page-fade {
@@ -277,6 +284,18 @@ button:active {
   padding: 0.95rem 1.5rem;
 }
 
+.figma-toolbar-var {
+  display: inline-flex;
+  width: 100%;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  border: 1px solid rgba(183, 20, 34, 0.08);
+  background: rgba(255, 245, 244, 0.4);
+  padding: 0.95rem 1.5rem;
+}
+
 .figma-toolbar-field {
   display: flex;
   flex-direction: column;
@@ -284,7 +303,6 @@ button:active {
 }
 
 .figma-toolbar-guests {
-  margin-left: auto;
   display: flex;
   align-items: flex-end;
   gap: 1rem;
@@ -522,5 +540,30 @@ button:active {
   .figma-card-detail-button,
   .figma-text-action {
     transition: none;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}
+
+@layer utilities {
+  @keyframes dice-roll {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(90deg);
+    }
+  }
+
+  .animate-dice {
+    animation: dice-roll 0.4s linear infinite;
   }
 }
