@@ -388,7 +388,7 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
         </section>
       </div>
       <div className="figma-shell">
-        <HotelReviews hotelId={hotelId} />
+        <HotelReviews hotelId={hotelId} hotelName={hotel.name} />
       </div>
     </main>
   );
