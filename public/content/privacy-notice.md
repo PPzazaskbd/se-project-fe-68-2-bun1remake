@@ -1,4 +1,4 @@
-# PRIVACY NOTICE
+# PRIVACY POLICY
 
 **Last updated: 22 April 2026**
 
