@@ -21,11 +21,13 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body>
+      <body className="overflow-hidden">
         <ReduxProvider>
           <NextAuthProvider session={session}>
             <TopMenu />
-            <PageTransition>{children}</PageTransition>
+            <div className="overflow-y-auto">
+              <PageTransition>{children}</PageTransition>
+            </div>
           </NextAuthProvider>
         </ReduxProvider>
       </body>

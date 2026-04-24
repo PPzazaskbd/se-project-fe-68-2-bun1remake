@@ -22,31 +22,33 @@ export default function DateRangeToolbar({
   onGuestsChildChange,
 }: DateRangeToolbarProps) {
   return (
-    <div className="figma-toolbar">
-      <label className="figma-toolbar-field">
-        <span className="figma-toolbar-label">from</span>
-        <input
-          type="date"
-          value={fromDate}
-          onChange={(event) => onFromDateChange(event.target.value)}
-          className="figma-toolbar-input"
-          aria-label="From date"
-        />
-      </label>
+    <div className="figma-toolbar-var">
+      <div className="figma-toolbar-guests justify-start">
+        <label className="figma-toolbar-field max-h-36 max-w-48">
+          <span className="figma-toolbar-label">from</span>
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(event) => onFromDateChange(event.target.value)}
+            className="figma-toolbar-input"
+            aria-label="From date"
+          />
+        </label>
 
-      <label className="figma-toolbar-field">
-        <span className="figma-toolbar-label">to</span>
-        <input
-          type="date"
-          value={toDate}
-          onChange={(event) => onToDateChange(event.target.value)}
-          className="figma-toolbar-input"
-          aria-label="To date"
-        />
-      </label>
+        <label className="figma-toolbar-field max-h-36 max-w-48">
+          <span className="figma-toolbar-label">to</span>
+          <input
+            type="date"
+            value={toDate}
+            onChange={(event) => onToDateChange(event.target.value)}
+            className="figma-toolbar-input"
+            aria-label="To date"
+          />
+        </label>
+      </div>
 
       <div className="figma-toolbar-guests">
-        <label className="figma-toolbar-field figma-toolbar-field-compact">
+        <label className="figma-toolbar-field max-h-36 max-w-48">
           <span className="figma-toolbar-label">adults</span>
           <input
             type="number"
@@ -60,7 +62,7 @@ export default function DateRangeToolbar({
           />
         </label>
 
-        <label className="figma-toolbar-field figma-toolbar-field-compact">
+        <label className="figma-toolbar-field max-h-36 max-w-48">
           <span className="figma-toolbar-label">children</span>
           <input
             type="number"

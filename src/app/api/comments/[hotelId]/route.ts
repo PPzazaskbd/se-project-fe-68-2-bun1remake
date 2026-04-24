@@ -36,21 +36,19 @@ export async function POST(
 ) {
   const authorization = getAuthorizationHeader(request);
 
-  if (!authorization) {
-    return NextResponse.json({ message: "Unauthorized." }, { status: 401 });
-  }
-
   try {
     const { hotelId } = await context.params;
     const body = await request.json();
+
+    // Forward auth header only when present (guests won't have one)
+    const forwardHeaders: Record<string, string> = { "Content-Type": "application/json" };
+    if (authorization) forwardHeaders.Authorization = authorization;
+
     const response = await fetch(
       buildBackendUrl(`/hotels/${encodeURIComponent(hotelId)}/comments`),
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: authorization,
-        },
+        headers: forwardHeaders,
         body: JSON.stringify(body),
       },
     );

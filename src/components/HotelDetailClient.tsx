@@ -51,7 +51,9 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
   const [toDate, setToDate] = useState(urlDateRange.checkOut);
   const [guestsAdult, setGuestsAdult] = useState(urlDateRange.guestsAdult);
   const [guestsChild, setGuestsChild] = useState(urlDateRange.guestsChild);
-  const [bookingState, setBookingState] = useState<"idle" | "arming" | "submitting">("idle");
+  const [bookingState, setBookingState] = useState<
+    "idle" | "arming" | "submitting"
+  >("idle");
   const { notice, showNotice, dismissNotice } = useDismissibleNotice();
   const bookingTimerRef = useRef<number | null>(null);
   const hotelId = hotel.id || hotel._id;
@@ -76,15 +78,12 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
         ? "Sending to backend..."
         : "";
   const bookingSearchParams = useMemo(() => {
-    const nextParams = createDateRangeSearchParams(
-      new URLSearchParams(),
-      {
-        checkIn: fromDate,
-        checkOut: toDate,
-        guestsAdult,
-        guestsChild,
-      },
-    );
+    const nextParams = createDateRangeSearchParams(new URLSearchParams(), {
+      checkIn: fromDate,
+      checkOut: toDate,
+      guestsAdult,
+      guestsChild,
+    });
     nextParams.set("hotelId", hotelId);
     nextParams.set("venue", hotel.name);
     return nextParams;
@@ -256,7 +255,9 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
               </p>
 
               <p className="mt-5 flex items-start gap-3 font-figma-copy text-[1.2rem] text-[var(--figma-ink)] sm:text-[1.45rem]">
-                <span className="pt-1 text-[var(--figma-red)]">+</span>
+                <span className="pt-1 text-[var(--figma-red)]">
+                  <img src="/address.svg" alt="+"/>
+                </span>
                 <span>{hotel.address}</span>
               </p>
 
@@ -281,7 +282,7 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
                   <span>${hotel.price.toLocaleString()}</span>
                 </div>
                 <div className="flex items-center justify-between gap-6">
-                  <span>night :</span>
+                  <span>Night :</span>
                   <span>{nights}</span>
                 </div>
                 <div className="flex items-center justify-between gap-6">
@@ -357,7 +358,11 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
                     <div className="flex items-center gap-2">
                       <Link href={`/hotel/${hotelId}/update`}>
                         <button className="flex h-10 w-10 items-center justify-center bg-red-700 text-white shadow transition-colors hover:bg-red-800 cursor-pointer">
-                          <img src="/edit.svg" alt="Edit icon" className="h-[18px] w-[18px]" />
+                          <img
+                            src="/edit.svg"
+                            alt="Edit icon"
+                            className="h-[18px] w-[18px]"
+                          />
                         </button>
                       </Link>
 
@@ -365,7 +370,11 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
                         href={`/hotel/deleteHotel?id=${hotelId}&name=${encodeURIComponent(hotel.name)}`}
                       >
                         <button className="flex h-10 w-10 items-center justify-center bg-red-700 text-white shadow transition-colors hover:bg-red-800 cursor-pointer">
-                          <img src="/delete.svg" alt="Delete icon" className="h-[18px] w-[18px]" />
+                          <img
+                            src="/delete.svg"
+                            alt="Delete icon"
+                            className="h-[18px] w-[18px]"
+                          />
                         </button>
                       </Link>
                     </div>
