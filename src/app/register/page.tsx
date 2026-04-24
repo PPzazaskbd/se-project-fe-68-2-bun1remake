@@ -168,12 +168,17 @@ function RegisterForm() {
               className="mt-1 h-4 w-4 shrink-0 accent-[var(--figma-red)]"
               required
             />
-            <label htmlFor="accept-privacy" className="leading-6">
-              I have read, accept:{" "}
-              <Link href="/about/privacy" className="text-[var(--figma-red)] underline">
-                Privacy Policy
-              </Link>
-            </label>
+              <label htmlFor="accept-privacy" className="leading-6">
+                I have read, accept:{" "}
+                <Link
+                  href="/about/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[var(--figma-red)] underline"
+                >
+                  Privacy Policy
+                </Link>
+              </label>
           </div>
 
           <DismissibleNotice notice={notice} onClose={dismissNotice} />
