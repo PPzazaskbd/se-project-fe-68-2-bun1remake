@@ -21,6 +21,7 @@ test.describe('User Story 2-1',()=>{
             await expect(review).toContainText('4.0');
             await expect(review).toContainText('user1');
             await expect(review).toContainText('Good');
+
         });
         test('Acceptance criteria 2-1:No Comment',async ({page})=>{
             test.setTimeout(60000);
