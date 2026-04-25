@@ -531,8 +531,8 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
 
   const submit = async () => {
     const latestText = syncTextFromEditor();
-    if (!token) return;
     if (!latestText.trim()) return showNotice({ type: "error", message: "Please write a comment." });
+    if (!token) return;
     setSubmitting(true);
     try {
       const payload: { comment: string; rating: number; guestName?: string } = {

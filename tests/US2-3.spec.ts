@@ -1,38 +1,28 @@
-import { test, expect, type Page } from '@playwright/test';
-import { LogInAsAdmin, LogInAsAdmin2 } from './auth-test';
-
-async function openHotelByName(page: Page, name: string) {
-  await page.goto('http://localhost:3000/hotels');
-  await page.getByRole('link', { name: 'HOTELS' }).click();
-  await page.getByRole('textbox', { name: 'Search by hotel name, city,' }).fill(name);
-  await page.getByRole('link', { name: 'detail' }).first().click();
-}
+import { test, expect } from '@playwright/test';
+import { LogInAsAdmin, LogInAsAdmin2, openHotelByName } from './helper';
 
 
 test.describe('Admin delete comment', () => {
+  test.describe.configure({ mode: 'serial' });
+
   test.beforeEach(async ({ page }) => {
     await LogInAsAdmin(page);
   });
 test('Admin delete successful', async ({ page }) => {
   const r = Math.random().toString(36).substring(2, 7);
+  const comment = 'Test comment ' + r;
   
   await openHotelByName(page, 'Test US2-3 Case1');
   await page.getByRole('button', { name: 'Write a review' }).click();
-  await page.getByRole('textbox', { name: 'Add your comment' }).click();
-  await page.getByRole('button', { name: 'Apply bold' }).click();
-  await page.getByRole('textbox', { name: 'Add your comment' }).fill('Test comment ' + r);
-  await page.getByRole('textbox', { name: 'Add your comment' }).press('ArrowLeft');
-  await page.getByRole('textbox', { name: 'Add your comment' }).fill('Test comment ' + r);
-  await page.getByRole('textbox', { name: 'Add your comment' }).click();
-
-  await page.getByRole('textbox', { name: 'Add your comment' }).click();
+  const commentBox = page.getByRole('textbox', { name: 'Add your comment' });
+  await commentBox.click();
+  await commentBox.pressSequentially(comment);
+  await expect(commentBox).toContainText(comment);
   await page.getByRole('button', { name: 'Submit Review' }).click();
-  await  page.waitForTimeout(2000);
-  const myReview = page.getByRole('article').filter({ hasText: 'Test comment ' + r });
-  await expect(myReview).toBeVisible();
+  const myReview = page.getByRole('article').filter({ hasText: comment });
+  await expect(myReview).toBeVisible({ timeout: 15000 });
   await myReview.getByRole('button', { name: 'Delete review' }).click();
   await page.getByRole('button', { name: 'Confirm to DELETE' }).click();
-  await  page.waitForTimeout(2000);
   await expect(myReview).toHaveCount(0);
 })
   test('Admin delete failed (another admin deleted the comment already but there\'s still loaded in this admin\'s page)', async ({ page, browser }) => {
