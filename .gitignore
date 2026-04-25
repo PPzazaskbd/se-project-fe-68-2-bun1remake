@@ -18,3 +18,5 @@ file_dump/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+.claude/
