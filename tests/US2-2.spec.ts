@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { LogInAsUser } from './auth-test';
+import { LogInAsUser, openHotelByName } from './helper';
 
 test.describe('User Story 2-2',()=>{
    test.describe('Logged In Cases', () => {
@@ -7,9 +7,7 @@ test.describe('User Story 2-2',()=>{
             await LogInAsUser(page);
         });
         test('Acceptance criteria 1',async ({page})=>{
-            await page.goto('http://localhost:3000/hotel');
-
-            await page.getByRole('link', { name: 'detail' }).nth(1).click();
+            await openHotelByName(page, 'Anantara Riverside');
             //delay 3s
             await page.waitForTimeout(3000);
 
@@ -17,21 +15,16 @@ test.describe('User Story 2-2',()=>{
 
             //delay 3s
             await page.waitForTimeout(3000);
-        
+
         });
 
         test('Acceptance criteria 2',async ({page})=>{
-            await page.goto('http://localhost:3000/hotel');
-
-            await page.getByRole('button', { name: 'Next page' }).click();
-            await page.getByRole('button', { name: 'Next page' }).click();
-
-            await page.getByRole('link', { name: 'ขอเทสplaywrightหน่อย' }).click();
-            await expect(page.getByRole('main')).toContainText('No ratings yet');
+            await openHotelByName(page, 'playwright');
+            await expect(page.getByText('No ratings yet')).toBeVisible({ timeout: 15000 });
 
             //delay 3s
             await page.waitForTimeout(3000);
-        
+
         })
     });
 });
