@@ -1,0 +1,71 @@
+
+> venue-explorer@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.15
+   - Local:        http://localhost:3001
+   - Network:      http://172.20.10.3:3001
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 4.9s
+ ○ Compiling / ...
+ ✓ Compiled / in 5.7s (1745 modules)
+ GET / 200 in 6490ms
+ GET / 200 in 131ms
+ ○ Compiling /api/auth/[...nextauth] ...
+ ✓ Compiled /api/auth/[...nextauth] in 1327ms (1753 modules)
+ GET /api/auth/session 200 in 2923ms
+ ○ Compiling /hotel ...
+ ✓ Compiled /hotel in 1487ms (1784 modules)
+ GET /hotel 200 in 2126ms
+ ○ Compiling /hotel/[hid] ...
+ ✓ Compiled /hotel/[hid] in 4.4s (2411 modules)
+ GET /hotel/69bf6e712a233d444785d245?checkIn=2026-04-25&checkOut=2026-04-26&guestsAdult=1&guestsChild=0 200 in 676ms
+ GET /hotel/69bf6e712a233d444785d245?checkIn=2026-04-25&checkOut=2026-04-26&guestsAdult=1&guestsChild=0 200 in 8108ms
+ GET /hotel/69bf6e712a233d444785d245?checkIn=2026-04-25&checkOut=2026-04-26&guestsAdult=1&guestsChild=0 200 in 674ms
+ GET /hotel/69bf6e712a233d444785d245?checkIn=2026-04-25&checkOut=2026-04-26&guestsAdult=1&guestsChild=0 200 in 657ms
+ GET /hotel/69bf6e712a233d444785d245?checkIn=2026-04-25&checkOut=2026-04-26&guestsAdult=1&guestsChild=0 200 in 710ms
+ ○ Compiling /api/comments/[hotelId] ...
+ ✓ Compiled /api/comments/[hotelId] in 1747ms (2425 modules)
+skibidihttps://se-project-be-68-2-bun1remake.vercel.app/api/v1/hotels/69bf6e712a233d444785d245/comments
+ GET /api/comments/69bf6e712a233d444785d245 200 in 3501ms
+skibidihttps://se-project-be-68-2-bun1remake.vercel.app/api/v1/hotels/69bf6e712a233d444785d245/comments
+ GET /api/comments/69bf6e712a233d444785d245 200 in 3715ms
+ ○ Compiling /login ...
+ ✓ Compiled /login in 1513ms (2415 modules)
+ GET /login 200 in 2454ms
+ ○ Compiling /api/auth/[...nextauth] ...
+ ✓ Compiled /api/auth/[...nextauth] in 704ms (1478 modules)
+ GET /api/auth/session 200 in 1114ms
+ ○ Compiling /register ...
+ ✓ Compiled /register in 1561ms (2429 modules)
+ GET /register 200 in 2046ms
+ GET / 200 in 114ms
+ GET /hotel 200 in 146ms
+ ○ Compiling /about ...
+ ✓ Compiled /mybooking in 10.8s (2731 modules)
+ GET /profile 200 in 7554ms
+ GET /mybooking 200 in 5574ms
+ GET /about 200 in 13511ms
+ GET /login?callbackUrl=%2Fmybooking 200 in 554ms
+ GET /login?callbackUrl=%2Fmybooking 200 in 264ms
+ GET /register?callbackUrl=%2Fmybooking 200 in 191ms
+ GET /login?callbackUrl=%2Fmybooking 200 in 98ms
+ GET /api/auth/providers 200 in 65ms
+ GET /api/auth/csrf 200 in 20ms
+ POST /api/auth/callback/credentials 200 in 1319ms
+ GET /api/auth/session 200 in 61ms
+ GET /mybooking 200 in 524ms
+ GET /mybooking 200 in 496ms
+ ○ Compiling /api/bookings ...
+ ✓ Compiled /api/bookings in 1786ms (2745 modules)
+ GET /api/bookings 200 in 2504ms
+ GET /api/bookings 200 in 2522ms
+ GET / 200 in 492ms
+ GET /api/auth/session 200 in 186ms
+ GET /api/auth/session 200 in 113ms
+ GET /api/auth/session 200 in 56ms
+ GET /api/auth/session 200 in 51ms
+ GET /api/auth/session 200 in 62ms
+ GET /api/auth/session 200 in 35ms

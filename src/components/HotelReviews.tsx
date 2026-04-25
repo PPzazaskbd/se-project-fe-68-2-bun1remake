@@ -413,6 +413,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
   const token = session?.user?.token || "";
   const uid = session?.user?._id || "";
   const role = session?.user?.role || "";
+  const canWriteReview = !!token;
 
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [avg, setAvg] = useState<number | null>(null);
@@ -422,7 +423,6 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
   const [showForm, setShowForm] = useState(false);
   const [rating, setRating] = useState(5);
   const [text, setText] = useState("");
-  const [guestName] = useState(() => "Guest-" + Math.random().toString(36).slice(2, 8).toUpperCase());
   const [submitting, setSubmitting] = useState(false);
   const [activeFormats, setActiveFormats] =
     useState<FormatState>(emptyFormatState());
@@ -521,6 +521,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
   };
 
   const toggleForm = () => {
+    if (!canWriteReview) return;
     if (showForm && editorRef.current) {
       editorRef.current.innerHTML = "";
       setText("");
@@ -532,23 +533,20 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
   const submit = async () => {
     const latestText = syncTextFromEditor();
     if (!latestText.trim()) return showNotice({ type: "error", message: "Please write a comment." });
-    if (!token) return;
+    if (!canWriteReview) return;
     setSubmitting(true);
     try {
-      const payload: { comment: string; rating: number; guestName?: string } = {
+      const payload = {
         comment: latestText.trim(),
         rating,
       };
-      if (!token) payload.guestName = guestName;
 
-      const r = await createComment(hotelId, token || null, payload);
+      const r = await createComment(hotelId, token, payload);
       if (r?.data) {
-        const savedAsUser = !!r.data.user;
-        const displayName = savedAsUser ? session?.user?.name || "You" : guestName.trim() || "Guest";
+        const displayName = session?.user?.name || "You";
         const enriched = {
           ...r.data,
-          user: savedAsUser ? { _id: uid, name: displayName } : null,
-          guestName: savedAsUser ? undefined : displayName,
+          user: { _id: uid, name: displayName },
         };
         const updated = [enriched, ...comments];
         setComments(updated);
@@ -561,11 +559,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
       setShowForm(false);
       showNotice({ type: "success", message: "Review submitted." });
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Failed to submit.";
-      const friendly = !token && /not authorized|unauthorized/i.test(msg)
-        ? "Guest comments aren't available right now. Please log in to leave a review."
-        : msg;
-      showNotice({ type: "error", message: friendly });
+      showNotice({ type: "error", message: e instanceof Error ? e.message : "Failed to submit." });
     } finally {
       setSubmitting(false);
     }
@@ -600,21 +594,29 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
             Reviews ({comments.length})
             {avg !== null && <span className="ml-2 text-[var(--figma-red)]">{avg.toFixed(1)}★</span>}
           </h2>
-          <button
-            type="button"
-            onClick={toggleForm}
-            className="flex h-12 w-12 shrink-0 items-center justify-center border border-[var(--figma-bg)] bg-[var(--figma-red-strong)] text-white font-figma-copy text-[2rem] leading-none sm:h-14 sm:w-14"
-            aria-label={showForm ? "Close" : "Write a review"}
-          >
-            {showForm ? (
-              <img src="/addhotel.svg" alt="Close" className="rotate-45" />
-            ) : (
-              <img src="/addhotel.svg" alt="+" />
-            )}
-          </button>
+          {canWriteReview && (
+            <button
+              type="button"
+              onClick={toggleForm}
+              className="flex h-12 w-12 shrink-0 items-center justify-center border border-[var(--figma-bg)] bg-[var(--figma-red-strong)] text-white font-figma-copy text-[2rem] leading-none sm:h-14 sm:w-14"
+              aria-label={showForm ? "Close" : "Write a review"}
+            >
+              {showForm ? (
+                <img src="/addhotel.svg" alt="Close" className="rotate-45" />
+              ) : (
+                <img src="/addhotel.svg" alt="+" />
+              )}
+            </button>
+          )}
         </div>
 
-        {showForm && (
+        {!canWriteReview && (
+          <p className="mt-6 border-t border-[rgba(171,25,46,0.12)] pt-6 font-figma-copy text-[1.2rem] text-[var(--figma-ink-soft)]">
+            <a href="/login" className="figma-link">Sign in</a> to leave a review.
+          </p>
+        )}
+
+        {canWriteReview && showForm && (
           <div className="mt-5 space-y-4 border-t border-[rgba(171,25,46,0.12)] pt-5">
             <div className="flex items-center gap-3">
               <span className="font-figma-copy text-[1.1rem] text-[var(--figma-red)]">
@@ -784,12 +786,6 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
             )}
           </>
         )}
-
-        {/* {!token && (
-          <p className="mt-6 border-t border-[rgba(171,25,46,0.12)] pt-6 font-figma-copy text-[1.2rem] text-[var(--figma-ink-soft)]">
-            <a href="/login" className="figma-link">Sign in</a> to leave a review.
-          </p>
-        )} */}
       </section>
     </>
   );
