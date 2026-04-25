@@ -351,14 +351,48 @@ function ReviewCard({
                   {ratingDisplay(c.rating)}{" "}
                   <span className="text-[var(--figma-ink)]">{nameOf(c)}</span>
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  className="shrink-0 text-[1.8rem] leading-none text-[var(--figma-ink-soft)] hover:text-[var(--figma-ink)]"
-                  aria-label="Close"
-                >
-                  <img src="/cross.svg" alt="x" />
-                </button>
+
+                <div className="flex items-center gap-2">
+                  {canDel &&
+                    (confirming ? (
+                      <button
+                        ref={confirmRef}
+                        type="button"
+                        disabled={isDeleting}
+                        onClick={() => { onDelete(c._id); setOpen(false); }}
+                      >
+                        {isDeleting ? (
+                          <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"
+                              strokeDasharray="32" strokeDashoffset="12" color="#B71422" />
+                          </svg>
+                        ) : (
+                          <div className="flex items-center gap-1.5 bg-[var(--figma-red)] text-white font-figma-copy text-[0.85rem] shrink-0 pl-2">
+                            Confirm to DELETE
+                            <img src="/delete.svg" width={21.33} height={24} alt="" />
+                          </div>
+                        )}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirming(true)}
+                        className="shrink-0 text-[var(--figma-red)] opacity-60 hover:opacity-100"
+                        aria-label="Delete review"
+                      >
+                        <img src="/deleteRed.svg" width={21.33} height={24} alt="" />
+                      </button>
+                    ))}
+
+                  <button
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    className="shrink-0 text-[1.8rem] leading-none text-[var(--figma-ink-soft)] hover:text-[var(--figma-ink)]"
+                    aria-label="Close"
+                  >
+                    <img src="/cross.svg" alt="x" />
+                  </button>
+                </div>
               </div>
               <div className="wrap-break-word font-figma-copy text-[1.05rem] leading-relaxed text-[var(--figma-ink)]">
                 {renderReviewText(raw)}
