@@ -19,18 +19,12 @@ test('Admin delete successful', async ({ page }) => {
   await openHotelByName(page, 'Test US2-3 Case1');
   await page.getByRole('button', { name: 'Write a review' }).click();
   await page.getByRole('textbox', { name: 'Add your comment' }).click();
+  await page.getByRole('button', { name: 'Apply bold' }).click();
   await page.getByRole('textbox', { name: 'Add your comment' }).fill('Test comment ' + r);
   await page.getByRole('textbox', { name: 'Add your comment' }).press('ArrowLeft');
   await page.getByRole('textbox', { name: 'Add your comment' }).fill('Test comment ' + r);
   await page.getByRole('textbox', { name: 'Add your comment' }).click();
 
-  await page.getByRole('textbox', { name: 'Add your comment' }).press('ArrowLeft');
-  await page.getByRole('textbox', { name: 'Add your comment' }).press('ArrowLeft');
-  await page.getByRole('textbox', { name: 'Add your comment' }).press('ArrowLeft');
-  await page.getByRole('textbox', { name: 'Add your comment' }).press('ArrowLeft');
-  await page.getByRole('textbox', { name: 'Add your comment' }).press('ControlOrMeta+Shift+ArrowLeft');
-  await page.getByRole('textbox', { name: 'Add your comment' }).press('ControlOrMeta+Shift+ArrowLeft');
-  await page.getByRole('button', { name: 'Apply bold' }).click();
   await page.getByRole('textbox', { name: 'Add your comment' }).click();
   await page.getByRole('button', { name: 'Submit Review' }).click();
   await  page.waitForTimeout(2000);
