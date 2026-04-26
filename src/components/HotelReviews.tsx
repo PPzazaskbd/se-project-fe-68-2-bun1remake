@@ -231,11 +231,13 @@ function ReviewCard({
   canDel,
   onDelete,
   isDeleting,
+  hotelName,
 }: {
   c: CommentItem;
   canDel: boolean;
   onDelete: (id: string) => void;
   isDeleting?: boolean;
+  hotelName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const raw = textOf(c);
@@ -280,16 +282,8 @@ function ReviewCard({
             >
               {isDeleting ? (
                 <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeDasharray="32"
-                    strokeDashoffset="12"
-                    color="#B71422"
-                  />
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"
+                    strokeDasharray="32" strokeDashoffset="12" color="#B71422" />
                 </svg>
               ) : (
                 <div className="flex items-center gap-1.5 bg-[var(--figma-red)] text-white font-figma-copy text-[0.85rem] shrink-0 disabled:opacity-50 border border-left-[var(--figma-red)] pl-2">
@@ -351,7 +345,6 @@ function ReviewCard({
                   {ratingDisplay(c.rating)}{" "}
                   <span className="text-[var(--figma-ink)]">{nameOf(c)}</span>
                 </span>
-
                 <div className="flex items-center gap-2">
                   {canDel &&
                     (confirming ? (
@@ -383,7 +376,6 @@ function ReviewCard({
                         <img src="/deleteRed.svg" width={21.33} height={24} alt="" />
                       </button>
                     ))}
-
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
@@ -397,9 +389,10 @@ function ReviewCard({
               <div className="wrap-break-word font-figma-copy text-[1.05rem] leading-relaxed text-[var(--figma-ink)]">
                 {renderReviewText(raw)}
               </div>
-              <p className="mt-4 text-right font-figma-copy text-[0.85rem] text-[var(--figma-ink-soft)]">
-                {relTime(dateOf(c))}
-              </p>
+              <div className="mt-4 flex items-end justify-between gap-2">
+                <p className="font-figma-copy text-[0.85rem] text-[var(--figma-ink-soft)]">{hotelName}</p>
+                <p className="font-figma-copy text-[0.85rem] text-[var(--figma-ink-soft)]">{relTime(dateOf(c))}</p>
+              </div>
             </div>
           </div>,
           document.body
@@ -408,7 +401,7 @@ function ReviewCard({
   );
 }
 
-export default function HotelReviews({ hotelId }: { hotelId: string }) {
+export default function HotelReviews({ hotelId, hotelName }: { hotelId: string; hotelName?: string }) {
   const { data: session } = useSession();
   const token = session?.user?.token || "";
   const uid = session?.user?._id || "";
@@ -660,6 +653,11 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
                   onFocus={refreshActiveFormats}
                   onKeyUp={refreshActiveFormats}
                   onMouseUp={refreshActiveFormats}
+                  onPaste={(e) => {
+                    e.preventDefault();
+                    const text = e.clipboardData.getData("text/plain");
+                    document.execCommand("insertText", false, text);
+                  }}
                   suppressContentEditableWarning
                   className="min-h-[140px] w-full whitespace-pre-wrap break-words bg-transparent p-4 font-figma-copy text-[1.05rem] text-[var(--figma-ink)] focus:outline-none"
                 />
@@ -753,6 +751,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
                   canDel={canDel(c)}
                   onDelete={(id) => void del(id)}
                   isDeleting={deletingId === c._id}
+                  hotelName={hotelName}
                 />
               ))}
             </div>

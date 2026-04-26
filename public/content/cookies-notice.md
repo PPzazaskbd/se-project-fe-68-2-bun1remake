@@ -1,4 +1,4 @@
-## 🍪 Cookie Policy
+## Cookie Notice
 
 **Last updated: April 24, 2026**
 
