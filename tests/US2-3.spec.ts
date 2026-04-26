@@ -23,6 +23,7 @@ test('Admin delete successful', async ({ page }) => {
   await expect(myReview).toBeVisible({ timeout: 15000 });
   await myReview.getByRole('button', { name: 'Delete review' }).click();
   await page.getByRole('button', { name: 'Confirm to DELETE' }).click();
+  await expect(page.getByText('Deleted a comment successfully')).toBeVisible();
   await expect(myReview).toHaveCount(0);
 })
   test('Admin delete failed (another admin deleted the comment already but there\'s still loaded in this admin\'s page)', async ({ page, browser }) => {
@@ -54,6 +55,7 @@ test('Admin delete successful', async ({ page }) => {
     await pageB.getByRole('button', { name: 'Confirm to DELETE' }).click();
     await pageB.waitForTimeout(2000);
 
+    await expect(pageB.getByText('Cannot delete this comment')).toBeVisible();
     await expect(pageB.getByText('Test comment concurrent ' + r)).toBeVisible();
 
     await contextB.close();

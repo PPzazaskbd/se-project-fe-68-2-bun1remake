@@ -573,8 +573,9 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
       const rest = comments.filter((c) => c._id !== id);
       setComments(rest);
       setAvg(recalcAvg(rest));
+      showNotice({ type: "success", message: "Deleted a comment successfully" });
     } catch (e) {
-      showNotice({ type: "error", message: e instanceof Error ? e.message : "Failed to delete." });
+      showNotice({ type: "error", message: "Cannot delete this comment" });
     } finally {
       setDeletingId(null);
     }
@@ -689,8 +690,6 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
               </div>
             </div>
 
-            <DismissibleNotice notice={notice} onClose={dismissNotice} />
-
             <button
               type="button"
               onClick={() => void submit()}
@@ -701,6 +700,8 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
             </button>
           </div>
         )}
+
+        <DismissibleNotice notice={notice} onClose={dismissNotice} className="mt-5" />
 
         {!loading && comments.length > 0 && (
           <div className="mt-5 flex gap-2">
