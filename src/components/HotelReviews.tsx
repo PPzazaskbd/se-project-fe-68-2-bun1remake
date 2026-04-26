@@ -286,7 +286,7 @@ function ReviewCard({
                     strokeDasharray="32" strokeDashoffset="12" color="#B71422" />
                 </svg>
               ) : (
-                <div className="flex items-center gap-1.5 bg-[var(--figma-red)] text-white font-figma-copy text-[0.85rem] shrink-0 pl-2">
+                <div className="flex items-center gap-1.5 bg-[var(--figma-red)] text-white font-figma-copy text-[0.85rem] shrink-0 disabled:opacity-50 border border-left-[var(--figma-red)] pl-2">
                   Confirm to DELETE
                   <img src="/delete.svg" width={21.33} height={24} alt="" />
                 </div>
@@ -345,7 +345,7 @@ function ReviewCard({
                   {ratingDisplay(c.rating)}{" "}
                   <span className="text-[var(--figma-ink)]">{nameOf(c)}</span>
                 </span>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2">
                   {canDel &&
                     (confirming ? (
                       <button
