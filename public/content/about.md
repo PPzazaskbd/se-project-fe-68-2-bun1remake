@@ -2,16 +2,16 @@
 
 ### **Who We Are**
 
-Welcome to **Bun1 Hotel Booking**. We are a team of passionate developers and problem-solvers dedicated to streamlining software deployment workflows. We believe that technology should be accessible, and the transition from local development to global production should be seamless.
+Welcome to **Bun1 Hotel Booking**. We are a student development team building a hotel booking demo that lets users browse hotels, review room details, and practice the flow of making a reservation in a clear and structured way.
 
 ### **Our Mission**
 
-Our goal is simple: to build tools that are as powerful as they are intuitive. Whether you are a student learning Docker for the first time or a professional architecting a Kubernetes cluster, we provide the platform and knowledge you need to reach your full potential.
+Our goal is to make the booking experience easy to understand from search to reservation. The project focuses on practical user flows, readable information, and reliable account features while giving our team hands-on experience with collaborative software development.
 
-> "Innovation is not just about new ideas; it's about meeting project requirement in time before the presentation."
+> "Our goal is to make hotel booking simple, clear, and reliable from search to reservation."
 
 ### **The Journey**
 
-Founded in 2026, **Bun1 Hotel Booking** started as a small academic project aimed at making a working hotel booking system and practice collaborating with team.
+Founded in 2026, **Bun1 Hotel Booking** began as an academic project focused on building a functional hotel booking system while practicing team collaboration, frontend development, and backend integration.
 
 ---

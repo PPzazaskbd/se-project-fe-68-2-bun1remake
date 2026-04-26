@@ -65,7 +65,7 @@ export default async function NoticeSection() {
 
   const notices = [
     {
-      title: "Privacy Notice",
+      title: "Privacy Policy",
       lastUpdated: privacyDate,
       href: "/about/privacy",
     },

@@ -2,13 +2,19 @@
 
 import { useRouter, useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { UpdateHotelPayload } from "@/libs/updateHotel";
 import type { HotelSpecializations } from "@/interface";
 import { updateHotelRecache } from "@/libs/recache";
 import getHotel from "@/libs/getHotel";
 import Arrow from "@/components/Arrow";
 import { UploadButton } from "@/utils/uploadthing";
+import {
+  formatHotelValidationMessages,
+  validateHotelForm,
+  type HotelImageStatus,
+  type HotelValidationField,
+} from "@/libs/hotelFormValidation";
 import tagOptions from "@/data/tagOptions.json";
 
 type Tab = "image" | "info" | "tag";
@@ -109,10 +115,12 @@ export default function UpdateHotelPage() {
   const [tab, setTab] = useState<Tab>("image");
   const [form, setForm] = useState<UpdateHotelPayload | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [tagSearch, setTagSearch] = useState("");
   const [openCategory, setOpenCategory] = useState<TagCategory>("location");
+  const [imageStatus, setImageStatus] = useState<HotelImageStatus>("idle");
+  const [validationAttempted, setValidationAttempted] = useState(false);
 
   const selectedSpecializations =
     form?.specializations ?? createEmptySpecializations();
@@ -121,6 +129,14 @@ export default function UpdateHotelPage() {
     selectedSpecializations.facility.length +
     selectedSpecializations.accessibility.length;
   const normalizedTagSearch = tagSearch.trim().toLowerCase();
+  const validationResult = useMemo(
+    () => (form ? validateHotelForm(form, imageStatus) : null),
+    [form, imageStatus],
+  );
+  const invalidFields =
+    validationAttempted && validationResult ? validationResult.invalidFields : [];
+  const hasInvalidField = (field: HotelValidationField) =>
+    invalidFields.includes(field);
 
   useEffect(() => {
     if (status !== "loading") {
@@ -135,6 +151,7 @@ export default function UpdateHotelPage() {
     getHotel(hid)
       .then((res) => {
         const { _id, id, __v, ...rest } = res.data;
+        setImageStatus(rest.imgSrc?.trim() ? "loading" : "idle");
         setForm({
           ...rest,
           specializations: normalizeSpecializations(rest.specializations),
@@ -144,6 +161,14 @@ export default function UpdateHotelPage() {
         setLoadError(err instanceof Error ? err.message : "Failed to load hotel.");
       });
   }, [hid]);
+
+  useEffect(() => {
+    if (!validationAttempted || !validationResult) return;
+
+    setErrorMessages(
+      validationResult.isValid ? [] : formatHotelValidationMessages(validationResult),
+    );
+  }, [validationAttempted, validationResult]);
 
   if (status === "loading" || form === null) {
     return <div className="min-h-screen bg-[#FDF6EF]" />;
@@ -208,12 +233,21 @@ export default function UpdateHotelPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
 
     if (!form) {
-      setError("Form is not ready yet.");
+      setErrorMessages(["Form is not ready yet."]);
       return;
     }
+
+    setValidationAttempted(true);
+    if (validationResult && !validationResult.isValid) {
+      setErrorMessages(formatHotelValidationMessages(validationResult));
+      if (validationResult.firstInvalidTab) {
+        setTab(validationResult.firstInvalidTab);
+      }
+      return;
+    }
+    setErrorMessages([]);
 
     if (!session?.user?.token) {
       router.push(`/login?callbackUrl=%2Fhotel%2F${hid}%2Fupdate`);
@@ -226,7 +260,9 @@ export default function UpdateHotelPage() {
       router.push("/hotel");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update hotel.");
+      setErrorMessages([
+        err instanceof Error ? err.message : "Failed to update hotel.",
+      ]);
     } finally {
       setSubmitting(false);
     }
@@ -279,13 +315,17 @@ export default function UpdateHotelPage() {
               {tab === "image" && (
                 <div className="flex flex-col items-center">
                   <div
-                    className="w-full bg-[#d9d9d9] flex items-center justify-center overflow-hidden"
+                    className={`w-full bg-[#d9d9d9] flex items-center justify-center overflow-hidden ${
+                      hasInvalidField("imgSrc") ? "figma-image-invalid" : ""
+                    }`}
                     style={{ aspectRatio: "2.24" }}
                   >
                     {form.imgSrc ? (
                       <img
                         src={form.imgSrc}
                         alt="Hotel preview"
+                        onLoad={() => setImageStatus("loaded")}
+                        onError={() => setImageStatus("error")}
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -306,6 +346,7 @@ export default function UpdateHotelPage() {
                         endpoint="imageUploader"
                         onClientUploadComplete={(res) => {
                           const url = res?.[0]?.ufsUrl || "";
+                          setImageStatus(url.trim() ? "loading" : "idle");
                           setForm((prev) => {
                             if (!prev) return prev;
                             return { ...prev, imgSrc: url };
@@ -343,7 +384,11 @@ export default function UpdateHotelPage() {
                         }
                         onChange={handleChange}
                         placeholder={label}
-                        className="figma-input"
+                        className={`figma-input ${
+                          hasInvalidField(name as HotelValidationField)
+                            ? "figma-input-invalid"
+                            : ""
+                        }`}
                       />
                     </div>
                   ))}
@@ -355,7 +400,11 @@ export default function UpdateHotelPage() {
                       value={form.description ?? ""}
                       onChange={handleChange}
                       placeholder="Description"
-                      className="figma-input resize-none"
+                      className={`figma-input resize-none ${
+                        hasInvalidField("description")
+                          ? "figma-input-invalid"
+                          : ""
+                      }`}
                     />
                   </div>
                 </div>
@@ -477,9 +526,20 @@ export default function UpdateHotelPage() {
                 </div>
               )}
 
-              {error && (
+              {errorMessages.length > 0 && (
                 <div className="figma-feedback figma-feedback-error mt-5 text-[0.9rem] font-bold">
-                  {error}
+                  {errorMessages.length === 1 ? (
+                    errorMessages[0]
+                  ) : (
+                    <>
+                      <p>Please complete the following:</p>
+                      <ul className="mt-2 list-disc pl-5 text-left">
+                        {errorMessages.map((message) => (
+                          <li key={message}>{message}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
                 </div>
               )}
             </div>

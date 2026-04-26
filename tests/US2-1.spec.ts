@@ -33,15 +33,8 @@ test.describe('User Story 2-1',()=>{
         test('Acceptance criteria 2-2:Not Login',async ({page})=>{
             test.setTimeout(60000);
             await openHotelByName(page, 'Four Seasons Chiang Mai');
-            await page.getByRole('button', { name: 'Write a review' }).click();
-            await page.getByRole('button', { name: 'Rate 1' }).click();
-            await page.getByRole('textbox', { name: 'Add your comment' }).fill('Suck');
-            await page.getByRole('button', { name: 'Submit Review' }).click();
-
-            await page.waitForTimeout(5000);
-
-            await expect(page.getByRole('button', { name: 'Submit Review' })).toBeVisible();
-            await expect(page.locator('article').filter({ hasText: 'Suck' })).not.toBeVisible();
+            await expect(page.getByRole('button', { name: 'Write a review' })).not.toBeVisible();
+            await expect(page.getByRole('link', { name: 'Sign in' })).toBeVisible();
         });
     });
 });
