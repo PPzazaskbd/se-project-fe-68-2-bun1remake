@@ -49,6 +49,18 @@ test('Admin delete successful', async ({ page }) => {
     await page.getByRole('button', { name: 'Confirm to DELETE' }).click();
     await page.waitForTimeout(2000);
     await expect(page.getByText('Test comment concurrent ' + r)).not.toBeVisible();
+    const comment = pageB.locator('article').filter({ hasText: 'Test comment concurrent ' + r });
+    
+    await comment.scrollIntoViewIfNeeded();
+     await pageB.getByText('fromtoadultschildrenTest US2-').click();
+    await pageB.locator('body').press('ArrowDown');
+    await pageB.locator('body').press('ArrowDown');
+    await pageB.locator('body').press('ArrowDown');
+    await pageB.locator('body').press('ArrowDown');
+    await pageB.locator('body').press('ArrowDown');
+    await pageB.locator('body').press('ArrowDown');
+    await pageB.locator('body').press('ArrowDown');
+    await pageB.locator('body').press('ArrowDown');
 
 
     await pageB.getByRole('button', { name: 'Delete review' }).click();

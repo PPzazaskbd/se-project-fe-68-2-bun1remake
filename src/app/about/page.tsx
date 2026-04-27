@@ -3,34 +3,28 @@ import path from "path";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-import BackToTop from "@/components/BackToTop";
 import LegalNotices from "@/components/NoticeCard";
 
 export default async function PrivacyPolicy() {
-  // 1. Get the path to the markdown file
   const filePath = path.join(process.cwd(), "public", "content", "about.md");
-
-  // 2. Read the file content
   const fileContent = fs.readFileSync(filePath, "utf8");
 
   return (
-    <main className="h-full max-w-4xl mx-auto !overflow-hidden flex flex-col no-scrollbar">
-      {/* 3. Render the Markdown */}
-      <div className="h-[90vh] overflow-y-auto overflow-x-hidden relative scroll-smooth p-6 pt-0 no-scrollbar">
+    <main className="figma-page h-[calc(100vh-80px)] overflow-y-auto overflow-x-hidden no-scrollbar">
+      <div className="mx-auto w-[min(850px,calc(100%_-_2rem))] pb-48 pt-[3.1rem]">
         <div className="max-w-none">
-          <div id="top-start" className="pt-10" />
+          <div id="top-start" />
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
-              // Headings
-              h1: ({ ...props }) => (
+              h1: ({ children }) => (
                 <h1
-                  className="font-figma-display text-5xl !tracking-wide font-bold text-[var(--figma-red)] mb-10 border-b border-[var(--figma-red-soft)] pb-6"
-                  {...props}
-                />
+                  className="mb-[4.4rem] text-center font-figma-copy text-[3rem] font-bold leading-none tracking-[0.05em] text-[var(--figma-red)]"
+                >
+                  {children}
+                </h1>
               ),
               h2: ({ node, ...props }) => {
-                // Convert text to a slug: "Hello World" -> "hello-world"
                 const id = props.children
                   ?.toString()
                   .toLowerCase()
@@ -39,78 +33,62 @@ export default async function PrivacyPolicy() {
                 return (
                   <h2
                     id={id}
-                    className="font-figma-display text-3xl font-semibold text-[var(--figma-red-strong)] mt-12 mb-4 uppercase tracking-wide scroll-mt-24"
+                    className="sr-only"
                     {...props}
                   />
                 );
               },
-              h3: ({ ...props }) => (
+              h3: ({ node, ...props }) => (
                 <h3
-                  className="font-figma-display text-2xl font-medium text-[var(--figma-ink)] mt-8 mb-3 italic"
+                  className="sr-only"
                   {...props}
                 />
               ),
 
               p: ({ children, node, ref, ...props }) => {
                 if (children === "===") {
-                  return (
-                    <hr
-                      // We do NOT spread props here to avoid the type mismatch
-                      className="mb-6 mt-12 border-t border-[var(--figma-border)] font-bold"
-                    />
-                  );
+                  return null;
                 }
 
                 return (
                   <p
-                    className="font-figma-copy text-[1.4rem] leading-relaxed text-[var(--figma-ink-soft)] mb-6"
-                    {...props} // Spreading into a <p> is safe here
+                    className="mb-4 font-figma-copy text-base leading-normal tracking-[0.05em] text-black"
+                    {...props}
                   >
                     {children}
                   </p>
                 );
               },
 
-              strong: ({ ...props }) => (
+              strong: ({ node, ...props }) => (
                 <strong
-                  className="font-bold text-[var(--figma-red-strong)]"
+                  className="font-bold text-[var(--figma-ink)]"
                   {...props}
                 />
               ),
 
-              // Lists with ink color
-              ul: ({ ...props }) => (
+              ul: ({ node, ...props }) => (
                 <ul
-                  className="list-disc list-outside ml-8 mb-8 space-y-3 text-[1.3rem] text-[var(--figma-ink-soft)]"
+                  className="mb-4 list-disc space-y-1 pl-6 font-figma-copy text-base leading-normal tracking-[0.05em] text-black"
                   {...props}
                 />
               ),
-              li: ({ ...props }) => <li className="pl-2" {...props} />,
+              li: ({ node, ...props }) => <li className="pl-2" {...props} />,
 
-              // Links use "figma-link" logic
-              a: ({ ...props }) => (
+              a: ({ node, ...props }) => (
                 <a
                   className="figma-link font-figma-nav !text-[var(--figma-red)] !tracking-wide font-bold border-b border-[var(--figma-red-soft)] hover:border-[var(--figma-red-strong)] transition-all"
                   {...props}
                 />
               ),
 
-              // Use "figma-feedback" style for blockquotes
-              blockquote: ({ ...props }) => (
-                <blockquote
-                  className="figma-feedback italic bg-[var(--figma-soft)] border-l-4 border-[var(--figma-red)] my-8 !pb-0 text-[1.2rem]"
-                  {...props}
-                />
-              ),
+              blockquote: () => null,
 
-              hr: () => (
-                <hr className="my-12 border-t border-[var(--figma-red-soft)] opacity-30" />
-              ),
+              hr: () => null,
             }}
           >
             {fileContent}
           </ReactMarkdown>
-          <BackToTop />
           <LegalNotices />
         </div>
       </div>

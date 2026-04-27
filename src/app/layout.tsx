@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import TopMenu from "@/components/TopMenu";
 import PageTransition from "@/components/PageTransition";
+import CookieConsentModal from "@/components/CookieConsentModal";
 import NextAuthProvider from "@/providers/NextAuthProvider";
 import ReduxProvider from "@/redux/ReduxProvider";
 import { getServerSession } from "next-auth";
@@ -25,12 +26,14 @@ export default async function RootLayout({
         <ReduxProvider>
           <NextAuthProvider session={session}>
             <TopMenu />
-            <div className="overflow-y-auto">
+            <div id="app-scroll-root" className="overflow-y-auto">
               <PageTransition>{children}</PageTransition>
             </div>
+            <CookieConsentModal />
           </NextAuthProvider>
         </ReduxProvider>
       </body>
     </html>
   );
 }
+// test

@@ -34,7 +34,7 @@ export default defineConfig({
     trace: 'on-first-retry',
 
     //screenshot
-    // screenshot: 'on',
+    screenshot: 'on',
     
     //video
     // video: 'retain-on-failure',
