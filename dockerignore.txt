@@ -1,0 +1,29 @@
+# Dependencies (Crucial! Let Docker install these inside the container)
+node_modules
+npm-debug.log
+
+# Build Outputs (Prevents local builds from clashing with Docker builds)
+.next
+out
+dist
+build
+
+# Environment Secrets (DO NOT PUSH THESE TO IMAGES)
+.env
+.env.local
+.env.development
+.env.production
+config/config.env
+
+# Git Files
+.git
+.gitignore
+
+# OS Junk
+.DS_Store
+Thumbs.db
+
+# Docker Files (The image doesn't need its own instructions)
+Dockerfile
+docker-compose.yml
+.dockerignore
