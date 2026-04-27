@@ -45,7 +45,11 @@ test.describe('User Story 2-1',()=>{
 
             await page.getByRole('button', { name: 'LOGOUT' }).click();
             await page.waitForTimeout(3000);
-            await LogInAsUser(page);
+            await page.getByRole('link', { name: 'LOGIN' }).click();
+            await page.getByRole('textbox', { name: 'Email Address' }).fill('user01@gmail.com');
+            await page.getByRole('textbox', { name: 'Password' }).fill('user67');
+            await page.getByRole('button', { name: 'LOG IN' }).click();
+            await page.waitForURL('**/', { timeout: 5000 });
             await openHotelByName(page, 'The Mandarin Residences');
             await user1Review.scrollIntoViewIfNeeded();
             await user1Review.getByRole('button', { name: 'Delete review' }).click();
@@ -65,22 +69,11 @@ test.describe('User Story 2-1',()=>{
     test.describe('Guest Cases (Not Login)', () => {
         test('Acceptance criteria 2-2:Not Login',async ({page})=>{
             test.setTimeout(60000);
-            await page.goto('http://localhost:3000/hotel');
+            await page.goto('http://localhost:3000/');
             await page.getByRole('button', { name: 'GOT IT' }).click();
-            await page.getByRole('link', { name: 'HOTELS' }).click();
-            await page.getByRole('textbox', { name: 'Search by hotel name, city,' }).fill('Four Seasons Chiang Mai');
-            const detailLink = page.getByRole('link', { name: 'detail' }).first();
-            await expect(detailLink).toBeVisible();
-            await detailLink.click();
-            await page.getByRole('button', { name: 'Write a review' }).click();
-            await page.getByRole('button', { name: 'Rate 1' }).click();
-            await page.getByRole('textbox', { name: 'Add your comment' }).fill('Suck');
-            await page.getByRole('button', { name: 'Submit Review' }).click();
-
-            await page.waitForTimeout(5000);
-
-            await expect(page.getByRole('button', { name: 'Submit Review' })).toBeVisible();
-            await expect(page.locator('article').filter({ hasText: 'Suck' })).not.toBeVisible();
+            await openHotelByName(page, 'Four Seasons Chiang Mai');
+            await expect(page.getByRole('button', { name: 'Write a review' })).not.toBeVisible();
+            await expect(page.getByRole('link', { name: 'Sign in' })).toBeVisible();
         });
     });
 });
