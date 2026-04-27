@@ -20,7 +20,7 @@ test.describe('US2-4: Comment Delete Requirements', () => {
   test('API delete comment works', async ({ page }) => {
     const comment = 'API test ' + Date.now();
 
-    await openHotelByName(page, 'Test US2-3 Case1');
+    await openHotelByName(page, 'test playwright');
 
     await page.getByRole('button', { name: 'Write a review' }).click();
     await page.getByRole('textbox', { name: 'Add your comment' }).fill(comment);
@@ -41,7 +41,7 @@ test.describe('US2-4: Comment Delete Requirements', () => {
   test('Delete confirmation appears', async ({ page }) => {
     const comment = 'Confirm test ' + Date.now();
 
-    await openHotelByName(page, 'Test US2-3 Case1');
+    await openHotelByName(page, 'test playwright');
 
     await page.getByRole('button', { name: 'Write a review' }).click();
     await page.getByRole('textbox', { name: 'Add your comment' }).fill(comment);
@@ -59,7 +59,7 @@ test.describe('US2-4: Comment Delete Requirements', () => {
   test('Comment is removed after delete', async ({ page }) => {
     const comment = 'Delete test ' + Date.now();
 
-    await openHotelByName(page, 'Test US2-3 Case1');
+    await openHotelByName(page, 'test playwright');
 
     await page.getByRole('button', { name: 'Write a review' }).click();
     await page.getByRole('textbox', { name: 'Add your comment' }).fill(comment);
@@ -80,7 +80,7 @@ test.describe('US2-4: Comment Delete Requirements', () => {
   test('User does not confirm delete (UX)', async ({ page }) => {
     const comment = 'UX test ' + Date.now();
 
-    await openHotelByName(page, 'Test US2-3 Case1');
+    await openHotelByName(page, 'test playwright');
 
     await page.getByRole('button', { name: 'Write a review' }).click();
     await page.getByRole('textbox', { name: 'Add your comment' }).fill(comment);
