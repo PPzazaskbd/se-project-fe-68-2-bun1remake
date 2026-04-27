@@ -256,6 +256,20 @@ button:active {
   border-bottom-color: var(--figma-red-strong);
 }
 
+.figma-input-invalid {
+  border-bottom-color: var(--figma-red-strong);
+  background: rgba(183, 20, 34, 0.08);
+}
+
+.figma-input-invalid::placeholder {
+  color: var(--figma-red-strong);
+}
+
+.figma-image-invalid {
+  border: 2px solid var(--figma-red-strong);
+  box-shadow: 0 0 0 4px rgba(183, 20, 34, 0.1);
+}
+
 .figma-input-readonly {
   border-bottom-color: rgba(23, 17, 12, 0.14);
   background: rgba(23, 17, 12, 0.05);

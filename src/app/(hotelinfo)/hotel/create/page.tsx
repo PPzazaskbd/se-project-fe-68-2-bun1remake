@@ -2,12 +2,18 @@
 
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import type { CreateHotelPayload } from "@/libs/createHotel";
 import type { HotelSpecializations } from "@/interface";
 import Arrow from "@/components/Arrow";
 import {UploadButton} from "@/utils/uploadthing";
 import { createHotelRecache } from "@/libs/recache";
+import {
+  formatHotelValidationMessages,
+  validateHotelForm,
+  type HotelImageStatus,
+  type HotelValidationField,
+} from "@/libs/hotelFormValidation";
 import tagOptions from "@/data/tagOptions.json";
 
 type Tab = "image" | "info" | "tag";
@@ -110,11 +116,13 @@ export default function CreateHotelPage() {
   const { data: session, status } = useSession();
   const [tab, setTab] = useState<Tab>("image");
   const [form, setForm] = useState<CreateHotelPayload>(EMPTY_FORM);
-  const [error, setError] = useState<string | null>(null);
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [tagSearch, setTagSearch] = useState("");
   const [openCategory, setOpenCategory] = useState<TagCategory>("location");
+  const [imageStatus, setImageStatus] = useState<HotelImageStatus>("idle");
+  const [validationAttempted, setValidationAttempted] = useState(false);
 
   const selectedSpecializations = form.specializations ?? createEmptySpecializations();
   const selectedTagCount =
@@ -122,6 +130,13 @@ export default function CreateHotelPage() {
     selectedSpecializations.facility.length +
     selectedSpecializations.accessibility.length;
   const normalizedTagSearch = tagSearch.trim().toLowerCase();
+  const validationResult = useMemo(
+    () => validateHotelForm(form, imageStatus),
+    [form, imageStatus],
+  );
+  const invalidFields = validationAttempted ? validationResult.invalidFields : [];
+  const hasInvalidField = (field: HotelValidationField) =>
+    invalidFields.includes(field);
 
   useEffect(() => {
     if (status !== "loading") {
@@ -133,12 +148,21 @@ export default function CreateHotelPage() {
 
   useEffect(() => {
     if (uploadedUrl) {
+      setImageStatus(uploadedUrl.trim() ? "loading" : "idle");
       setForm((prev) => ({
         ...prev,
         imgSrc: uploadedUrl,
       }));
     }
   }, [uploadedUrl]);
+
+  useEffect(() => {
+    if (!validationAttempted) return;
+
+    setErrorMessages(
+      validationResult.isValid ? [] : formatHotelValidationMessages(validationResult),
+    );
+  }, [validationAttempted, validationResult]);
 
   if (status === "loading") {
     return <div className="min-h-screen bg-[#FDF6EF]" />;
@@ -187,23 +211,16 @@ export default function CreateHotelPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
 
-    const requiredText: (keyof CreateHotelPayload)[] = [
-      "name", "address", "district", "province",
-      "postalcode", "region", "tel", "description",
-    ];
-    const missingText = requiredText.find((k) => !String(form[k]).trim());
-    if (missingText) {
-      setError(`Please fill in all required fields (${missingText}).`);
-      setTab("info");
+    setValidationAttempted(true);
+    if (!validationResult.isValid) {
+      setErrorMessages(formatHotelValidationMessages(validationResult));
+      if (validationResult.firstInvalidTab) {
+        setTab(validationResult.firstInvalidTab);
+      }
       return;
     }
-    if (form.price <= 0) {
-      setError("Price must be greater than 0.");
-      setTab("tag");
-      return;
-    }
+    setErrorMessages([]);
 
     if (!session?.user?.token) {
       router.push("/login?callbackUrl=%2Fhotel%2Fcreate");
@@ -216,7 +233,9 @@ export default function CreateHotelPage() {
       router.push("/hotel");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create hotel.");
+      setErrorMessages([
+        err instanceof Error ? err.message : "Failed to create hotel.",
+      ]);
     } finally {
       setSubmitting(false);
     }
@@ -288,13 +307,17 @@ export default function CreateHotelPage() {
                     Full panel width minus padding
                   */}
                   <div
-                    className="w-full bg-[#d9d9d9] flex items-center justify-center overflow-hidden"
+                    className={`w-full bg-[#d9d9d9] flex items-center justify-center overflow-hidden ${
+                      hasInvalidField("imgSrc") ? "figma-image-invalid" : ""
+                    }`}
                     style={{ aspectRatio: "2.24" }}
                   >
                     {form.imgSrc ? (
                       <img
                         src={form.imgSrc}
                         alt="Hotel preview"
+                        onLoad={() => setImageStatus("loaded")}
+                        onError={() => setImageStatus("error")}
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -353,7 +376,11 @@ export default function CreateHotelPage() {
                           : (form[name] as string)}
                         onChange={handleChange}
                         placeholder={label}
-                        className="figma-input"
+                        className={`figma-input ${
+                          hasInvalidField(name as HotelValidationField)
+                            ? "figma-input-invalid"
+                            : ""
+                        }`}
                       />
                     </div>
                   ))}
@@ -365,7 +392,11 @@ export default function CreateHotelPage() {
                       value={form.description}
                       onChange={handleChange}
                       placeholder="Description"
-                      className="figma-input resize-none"
+                      className={`figma-input resize-none ${
+                        hasInvalidField("description")
+                          ? "figma-input-invalid"
+                          : ""
+                      }`}
                     />
                   </div>
                 </div>
@@ -488,9 +519,20 @@ export default function CreateHotelPage() {
               )}
 
               {/* Error */}
-              {error && (
+              {errorMessages.length > 0 && (
                 <div className="figma-feedback figma-feedback-error mt-5 text-[0.9rem] font-bold">
-                  {error}
+                  {errorMessages.length === 1 ? (
+                    errorMessages[0]
+                  ) : (
+                    <>
+                      <p>Please complete the following:</p>
+                      <ul className="mt-2 list-disc pl-5 text-left">
+                        {errorMessages.map((message) => (
+                          <li key={message}>{message}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
                 </div>
               )}
             </div>

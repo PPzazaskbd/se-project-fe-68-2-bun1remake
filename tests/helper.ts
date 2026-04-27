@@ -33,9 +33,7 @@ export async function LogInAsUser(page:Page) {
 
 export async function openHotelByName(page: Page, name: string) {
   await page.goto('http://localhost:3000/hotel');
-  await page.getByRole('link', { name: 'HOTELS' }).click();
   await page.getByRole('textbox', { name: 'Search by hotel name, city,' }).fill(name);
-  const detailLink = page.getByRole('link', { name: 'detail' }).first();
-  await expect(detailLink).toBeVisible();
-  await detailLink.click();
+  await page.locator('article').filter({ hasText: name }).getByRole('link', { name: 'detail' }).first().click();
+  await page.waitForURL(url => url.pathname !== '/hotel', { timeout: 30000 });
 }
