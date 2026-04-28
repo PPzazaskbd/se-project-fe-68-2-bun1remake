@@ -69,7 +69,7 @@ test.describe('User Story 2-1',()=>{
     test.describe('Guest Cases (Not Login)', () => {
         test('Acceptance criteria 2-2:Not Login',async ({page})=>{
             test.setTimeout(60000);
-            await page.goto('http://localhost:3000/');
+            await page.goto('https://se-project-fe-68-2-bun1remake.vercel.app/');
             await page.getByRole('button', { name: 'GOT IT' }).click();
             await openHotelByName(page, 'Four Seasons Chiang Mai');
             await expect(page.getByRole('button', { name: 'Write a review' })).not.toBeVisible();

@@ -1,7 +1,7 @@
 import { expect, Page } from '@playwright/test';
 
 async function logIn(page: Page, email: string, password: string) {
-  await page.goto('http://localhost:3000/');
+  await page.goto('https://se-project-fe-68-2-bun1remake.vercel.app/');
   await page.getByRole('button', { name: 'GOT IT' }).click();
   await page.getByRole('link', { name: 'LOGIN' }).click();
   await page.getByRole('textbox', { name: 'Email Address' }).fill(email);
@@ -32,7 +32,7 @@ export async function LogInAsUser(page:Page) {
 }
 
 export async function openHotelByName(page: Page, name: string) {
-  await page.goto('http://localhost:3000/hotel');
+  await page.goto('https://se-project-fe-68-2-bun1remake.vercel.app/hotel');
   await page.getByRole('textbox', { name: 'Search by hotel name, city,' }).fill(name);
   await page.locator('article').filter({ hasText: name }).getByRole('link', { name: 'detail' }).first().click();
   await page.waitForURL(url => url.pathname !== '/hotel', { timeout: 30000 });
